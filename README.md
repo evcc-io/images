@@ -12,7 +12,7 @@ Repository for ready-to-use Debian-based [evcc](https://evcc.io) images for popu
 - ☀️🚗 [evcc](https://evcc.io) for smart energy management
 - 🔒 [Caddy](https://caddyserver.com) reverse proxy for HTTPS
 - 🛠️ [Cockpit](https://cockpit-project.org) web console for administration
-- 📶 [comitup](https://github.com/davesteele/comitup) for WiFi setup without ethernet
+- 📶 [wifi-connect](https://github.com/balena-os/wifi-connect) for WiFi setup without ethernet
 - 🐧 [Armbian](https://www.armbian.com) base image and build system
 
 ## Getting Started
@@ -67,16 +67,19 @@ For reliability we **strongly suggest** using a **wired ethernet connection**.
 
 ### Wireless Setup
 
-If a wired setup is not possible this image also includes a wireless onboarding process.
-The device will create a WiFi setup hotspot **if no internet connection is detected after 30 seconds of boot**.
+If a wired setup is not possible, this image includes an automatic wireless configuration system.
+The device will create a WiFi setup hotspot (`evcc-setup`) whenever no network connection is available.
 
 1. Power your device
-2. Connect to `evcc-setup` network from your phone or laptop
-3. Select your WiFi network and enter the password
-4. Connect back to your home network
-5. Continue with step 4 from [Getting Started](#getting-started)
+2. Wait a moment for the device to detect no network connection
+3. Connect to `evcc-setup` network from your phone or laptop
+4. A captive portal will open automatically (or browse to any website)
+5. Select your WiFi network and enter the password
+6. The device will connect to your network and the setup hotspot will disappear
+7. Connect back to your home network
+8. Continue with step 4 from [Getting Started](#getting-started)
 
-**Note**: WiFi setup is a one-time process. To reconfigure WiFi at a new location, simply reboot the device and `evcc-setup` will appear again.
+**Note**: The `evcc-setup` hotspot will automatically appear whenever the device loses network connectivity, making it easy to reconfigure WiFi at a new location or recover from network issues.
 
 For ethernet-only boards like the Radxa and NanoPi, you can use WiFi USB dongles. The following adapters have been tested successfully:
 

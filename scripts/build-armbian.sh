@@ -96,6 +96,7 @@ pushd "$BUILD_DIR" >/dev/null
   VENDOR="evcc" \
   VENDORURL="https://evcc.io" \
   IMAGE_SUFFIX="evcc-${EVCC_VERSION}" \
+  NETWORKING_STACK="network-manager" \
   ./compile.sh \
     BOARD="$BOARD" \
     BRANCH=current \

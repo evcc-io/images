@@ -41,11 +41,11 @@ echo "[customize-image] setting up system"
 apt-get update
 apt-get -y full-upgrade
 
-# Install base networking utils and mdns (avahi)
+# Install base utils and mdns (avahi)
 apt-get install -y --no-install-recommends \
   curl ca-certificates gnupg apt-transport-https \
   avahi-daemon avahi-utils libnss-mdns \
-  sudo network-manager python3-gi python3-dbus
+  sudo
 
 # Set timezone
 apt-get install -y --no-install-recommends tzdata
@@ -105,147 +105,121 @@ test -d /root || mkdir -p /root
 chown -R root:root /root
 
 # ============================================================================
-# COMITUP WIFI SETUP
+# WIFI-CONNECT SETUP
 # ============================================================================
-echo "[customize-image] setting up comitup for wifi configuration"
+echo "[customize-image] setting up wifi-connect for wifi configuration"
 
-# Install latest comitup from official repository (fixes device type compatibility)
-curl -L -o /tmp/davesteele-comitup-apt-source.deb \
-  "https://davesteele.github.io/comitup/deb/davesteele-comitup-apt-source_1.3_all.deb"
-dpkg -i /tmp/davesteele-comitup-apt-source.deb || apt-get install -f -y
-apt-get update
-apt-get install -y --no-install-recommends comitup
-rm -f /tmp/davesteele-comitup-apt-source.deb
-
-# Clean up any potential interface conflicts
-rm -f /etc/network/interfaces || true
-
-# Mask conflicting services per official comitup documentation
-systemctl mask dhcpcd.service || true
-systemctl mask wpa-supplicant.service || true
-
-# Configure systemd-resolved to not conflict with dnsmasq (needed for DHCP)
-mkdir -p /etc/systemd/resolved.conf.d
-cat >/etc/systemd/resolved.conf.d/comitup.conf <<'RESOLVEDCONF'
-[Resolve]
-# Don't bind to port 53 - let dnsmasq use it for AP mode DHCP
-DNSStubListener=no
-RESOLVEDCONF
-
-# Ensure dnsmasq is available for comitup DHCP functionality
+# Install dnsmasq (required by wifi-connect for DHCP)
 apt-get install -y --no-install-recommends dnsmasq
-# Keep dnsmasq disabled - comitup will manage it when needed  
-systemctl stop dnsmasq.service || true
 systemctl disable dnsmasq.service || true
-systemctl mask dnsmasq.service || true
 
-# Enable NetworkManager (comitup manages dnsmasq and hostapd automatically)
-systemctl enable NetworkManager.service || true
+# Download and install wifi-connect
+WIFI_CONNECT_VERSION=$(curl -s https://api.github.com/repos/balena-os/wifi-connect/releases/latest | grep -oP '"tag_name": "\K(.*)(?=")')
+echo "[customize-image] Installing wifi-connect version: $WIFI_CONNECT_VERSION"
 
-# Configure comitup with minimal settings
-cat >/etc/comitup.conf <<'COMITUPCONF'
-ap_name: evcc-setup
-enable_appliance_mode: false
-COMITUPCONF
+# Determine architecture
+ARCH=$(dpkg --print-architecture)
+case "$ARCH" in
+  armhf)
+    WIFI_CONNECT_ARCH="armv7-unknown-linux-gnueabihf"
+    ;;
+  arm64|aarch64)
+    WIFI_CONNECT_ARCH="aarch64-unknown-linux-gnu"
+    ;;
+  *)
+    echo "[customize-image] Unsupported architecture: $ARCH"
+    exit 1
+    ;;
+esac
 
-# One-time WiFi setup check: only start AP if no internet at boot
-cat >/usr/local/bin/evcc-wifi-setup.sh <<'WIFISETUP'
-#!/bin/bash
-# Start WiFi setup AP only if no internet connection after boot
+# Download and extract wifi-connect
+curl -L -o /tmp/wifi-connect.tar.gz \
+  "https://github.com/balena-os/wifi-connect/releases/download/$WIFI_CONNECT_VERSION/wifi-connect-$WIFI_CONNECT_ARCH.tar.gz"
+tar -xzf /tmp/wifi-connect.tar.gz -C /tmp/
+mv /tmp/wifi-connect /usr/local/sbin/
+chmod +x /usr/local/sbin/wifi-connect
+rm -f /tmp/wifi-connect.tar.gz
 
-# Give ethernet/network 45 seconds to establish (increased for reliability)
-sleep 45
+# Create custom UI with compact HTML
+mkdir -p /usr/local/share/wifi-connect-ui
+cat >/usr/local/share/wifi-connect-ui/index.html <<'HTML'
+<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1"><title>WiFi Setup - evcc</title><style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;padding:20px;background:#f5f5f5;min-height:100vh}
+.container{max-width:400px;margin:0 auto;background:#fff;border-radius:12px;padding:24px;box-shadow:0 2px 12px rgba(0,0,0,0.08)}
+.logo{text-align:center;margin-bottom:24px}
+h1{color:#1a1a1a;margin-bottom:8px;font-size:24px;font-weight:600}
+.subtitle{color:#666;margin-bottom:24px;font-size:14px}
+.network-list{margin:20px 0}
+.network{padding:16px;border:1px solid #e0e0e0;margin:8px 0;cursor:pointer;border-radius:8px;display:flex;justify-content:space-between;align-items:center;transition:all 0.2s}
+.network:hover{background:#f8f9fa;border-color:#0ea5e9}
+.network-name{font-weight:500;color:#333}
+.signal{font-size:12px;color:#888}
+input{width:100%;padding:12px 16px;margin:12px 0;border:1px solid #e0e0e0;border-radius:8px;font-size:16px;transition:border-color 0.2s}
+input:focus{outline:none;border-color:#0ea5e9}
+button{background:#0ea5e9;color:#fff;border:none;padding:12px 24px;cursor:pointer;border-radius:8px;width:100%;font-size:16px;font-weight:500;transition:background 0.2s}
+button:hover:not(:disabled){background:#0284c7}
+button:disabled{background:#cbd5e1;cursor:not-allowed}
+.secondary-btn{background:#64748b;margin-top:8px}
+.secondary-btn:hover{background:#475569}
+.status{padding:12px 16px;margin:16px 0;border-radius:8px;text-align:center;font-size:14px}
+.status.info{background:#dbeafe;color:#1e40af;border:1px solid #93c5fd}
+.status.success{background:#dcfce7;color:#166534;border:1px solid #86efac}
+.status.error{background:#fee2e2;color:#991b1b;border:1px solid #fca5a5}
+.hidden{display:none}
+.loading{text-align:center;padding:32px;color:#666}
+.spinner{border:3px solid #f3f4f6;border-top:3px solid #0ea5e9;border-radius:50%;width:24px;height:24px;animation:spin 1s linear infinite;margin:0 auto 16px}
+@keyframes spin{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}
+</style></head><body>
+<div class="container">
+<div class="logo"><h1>evcc WiFi Setup</h1><div class="subtitle">Select your network to get started</div></div>
+<div id="status" class="status hidden"></div>
+<div id="network-list"><div class="loading"><div class="spinner"></div>Scanning for networks...</div></div>
+<div id="connect-form" class="hidden">
+<h2 style="margin-bottom:16px;font-size:18px">Connect to <span id="selected-network"></span></h2>
+<input type="password" id="password" placeholder="Enter WiFi password" autocomplete="off">
+<button id="connect-btn" onclick="connect()">Connect</button>
+<button class="secondary-btn" onclick="showNetworks()">← Back to networks</button>
+</div>
+</div>
+<script>
+let selectedSSID='',networks=[];
+function loadNetworks(){fetch('/networks').then(r=>r.json()).then(data=>{networks=data;displayNetworks()}).catch(err=>{document.getElementById('network-list').innerHTML='<div class="status error">Failed to load networks. Please refresh the page.</div><button onclick="location.reload()">Refresh</button>'})}
+function displayNetworks(){if(networks.length===0){document.getElementById('network-list').innerHTML='<div class="status info">No WiFi networks found</div><button onclick="loadNetworks()">Scan Again</button>';return}
+const html='<div class="network-list">'+networks.map(n=>{const signal=n.signal?Math.min(100,Math.max(0,(n.signal+100)*2))+'%':'';return'<div class="network" onclick="selectNetwork(\''+n.ssid.replace(/'/g,"\\'")+'\')">'+'<span class="network-name">'+n.ssid+'</span>'+'<span class="signal">'+signal+'</span>'+'</div>'}).join('')+'</div>';document.getElementById('network-list').innerHTML=html}
+function selectNetwork(ssid){selectedSSID=ssid;document.getElementById('selected-network').textContent=ssid;document.getElementById('network-list').classList.add('hidden');document.getElementById('connect-form').classList.remove('hidden');document.getElementById('status').classList.add('hidden');document.getElementById('password').value='';document.getElementById('password').focus()}
+function showNetworks(){document.getElementById('connect-form').classList.add('hidden');document.getElementById('network-list').classList.remove('hidden');document.getElementById('status').classList.add('hidden')}
+function showStatus(message,type){const status=document.getElementById('status');status.textContent=message;status.className='status '+type;status.classList.remove('hidden')}
+function connect(){const password=document.getElementById('password').value;const button=document.getElementById('connect-btn');if(!password){showStatus('Please enter a password','error');return}
+button.disabled=true;button.textContent='Connecting...';showStatus('Connecting to '+selectedSSID+'...','info');
+fetch('/connect',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({ssid:selectedSSID,identity:'',passphrase:password})})
+.then(r=>{if(r.ok){showStatus('Successfully connected! You can close this window.','success');setTimeout(()=>{document.body.innerHTML='<div class="container"><div class="status success">Connected to '+selectedSSID+'</div><p style="text-align:center;margin-top:20px">You can now close this window and access evcc at <strong>https://evcc.local</strong></p></div>'},2000)}else{throw new Error('Connection failed')}})
+.catch(err=>{showStatus('Failed to connect. Please check the password and try again.','error');button.disabled=false;button.textContent='Connect'})}
+document.addEventListener('DOMContentLoaded',()=>{document.getElementById('password').addEventListener('keypress',(e)=>{if(e.key==='Enter')connect()});loadNetworks();setInterval(()=>{if(!document.getElementById('network-list').classList.contains('hidden')){loadNetworks()}},10000)});
+</script></body></html>
+HTML
 
-# Multiple internet connectivity checks for reliability
-INTERNET_AVAILABLE=false
-
-# Check 1: NetworkManager connectivity (accept both 'full' and 'portal')
-CONNECTIVITY=$(nmcli networking connectivity check 2>/dev/null)
-if echo "$CONNECTIVITY" | grep -qE 'full|portal'; then
-    INTERNET_AVAILABLE=true
-    echo "NetworkManager reports connectivity: $CONNECTIVITY"
-fi
-
-# Check 2: Ping test as fallback
-if [[ "$INTERNET_AVAILABLE" == "false" ]]; then
-    if ping -c 1 -W 5 8.8.8.8 >/dev/null 2>&1; then
-        INTERNET_AVAILABLE=true
-        echo "Ping test confirms internet connectivity"
-    fi
-fi
-
-# Start AP only if no internet detected AND WiFi hardware exists
-if [[ "$INTERNET_AVAILABLE" == "false" ]]; then
-    # Check if WiFi hardware exists
-    if ls /sys/class/net/wl* >/dev/null 2>&1 || iwconfig 2>/dev/null | grep -q "IEEE 802.11"; then
-        # Unmask comitup first in case it was masked from previous boot
-        systemctl unmask comitup.service >/dev/null 2>&1 || true
-        systemctl enable comitup.service >/dev/null 2>&1 || true
-        systemctl start comitup.service >/dev/null 2>&1 || true
-        echo "No internet detected - WiFi setup AP started"
-    else
-        echo "No internet detected but no WiFi hardware found - skipping WiFi setup"
-    fi
-else
-    # Internet available - ensure comitup is stopped and cleanup hotspot
-    echo "Stopping comitup service..."
-    
-    # First try graceful stop with timeout
-    timeout 10 systemctl stop comitup.service 2>&1 || {
-        echo "Graceful stop failed, forcing kill..."
-        systemctl kill comitup.service 2>&1 || true
-        sleep 2
-    }
-    
-    # Reset any failed state before disabling
-    systemctl reset-failed comitup.service 2>&1 || true
-    
-    # Just disable, don't mask - this prevents "failed" status in Cockpit
-    systemctl disable comitup.service 2>&1 || echo "Disable failed"
-    
-    # Clean up any active hotspot connections
-    HOTSPOT_CONN=$(nmcli -t -f NAME connection show --active | grep "evcc-setup" || true)
-    if [[ -n "$HOTSPOT_CONN" ]]; then
-        echo "Cleaning up hotspot connection: $HOTSPOT_CONN"
-        nmcli connection down "$HOTSPOT_CONN" 2>/dev/null || true
-        nmcli connection delete "$HOTSPOT_CONN" 2>/dev/null || true
-    fi
-    
-    echo "Internet available - WiFi setup stopped"
-fi
-WIFISETUP
-
-chmod +x /usr/local/bin/evcc-wifi-setup.sh
-
-# Create systemd service for one-time WiFi setup check
-cat >/etc/systemd/system/evcc-wifi-setup.service <<'WIFISERVICE'
+# Create systemd service for wifi-connect
+cat >/etc/systemd/system/wifi-connect.service <<'WIFISERVICE'
 [Unit]
-Description=Start WiFi setup if no internet at boot
-After=network-online.target
+Description=Balena WiFi Connect
+After=NetworkManager.service
+Wants=NetworkManager.service
 
 [Service]
-Type=oneshot
-ExecStart=/usr/local/bin/evcc-wifi-setup.sh
+Type=simple
+Restart=on-failure
+RestartSec=5
+ExecStart=/usr/local/sbin/wifi-connect --portal-ssid "evcc-setup" --ui-directory /usr/local/share/wifi-connect-ui
+StandardOutput=journal
+StandardError=journal
 
 [Install]
 WantedBy=multi-user.target
 WIFISERVICE
 
-# Enable the one-time WiFi setup check
-systemctl enable evcc-wifi-setup.service || true
-
-# Create NetworkManager configuration for comitup compatibility
-cat >/etc/NetworkManager/conf.d/comitup.conf <<'NMCONF'
-[main]
-unmanaged-devices=interface-name:comitup-*,type:wifi-p2p
-
-[device]
-wifi.scan-rand-mac-address=no
-
-[connectivity]
-uri=http://detectportal.firefox.com/canonical.html
-interval=300
-NMCONF
+# Enable wifi-connect service
+systemctl enable wifi-connect.service || true
 
 
 # ============================================================================
