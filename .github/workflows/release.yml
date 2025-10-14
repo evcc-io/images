@@ -57,17 +57,19 @@ jobs:
           # Generate base name from current month and year (YYYY-MM format)
           base_name=$(date '+%Y-%m')
 
-          # Check if release with this name already exists
-          increment=2
-          release_name="$base_name"
-          release_tag="v$base_name"
+          # Get the latest release tag matching the base pattern
+          latest_tag=$(gh release list --json tagName --jq '.[].tagName' | grep "^v${base_name}" | head -n1 || echo "")
 
-          # Use GitHub CLI to check for existing releases
-          while gh release view "$release_tag" >/dev/null 2>&1; do
-            release_name="${base_name}.${increment}"
-            release_tag="v${base_name}.${increment}"
-            increment=$((increment + 1))
-          done
+          # Extract increment number from latest tag, or start at 1
+          if [[ -n "$latest_tag" && $latest_tag =~ ^v${base_name}\.([0-9]+)$ ]]; then
+            increment=$((BASH_REMATCH[1] + 1))
+          else
+            increment=1
+          fi
+
+          # Always use .x notation
+          release_name="${base_name}.${increment}"
+          release_tag="v${base_name}.${increment}"
 
           echo "name=$release_name" >> $GITHUB_OUTPUT
           echo "tag=$release_tag" >> $GITHUB_OUTPUT
