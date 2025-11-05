@@ -11,6 +11,7 @@ REPO_ROOT=$(cd -- "${SCRIPT_DIR}/.." && pwd)
 BOARD=""
 HOSTNAME="evcc"
 RELEASE_NAME="local"
+OPENWB_DISPLAY="false"
 
 usage() {
   cat <<EOF
@@ -20,7 +21,7 @@ Examples:
   $0 --board rpi4b
   $0 --board nanopi-r3s --release-name 2025-01
 
-Supported boards are those supported by Armbian mainline (e.g. rpi4b, nanopi-r3s).
+Supported boards are those supported by Armbian mainline (e.g. rpi4b, nanopi-r3s, openwb, openwb-display).
 EOF
 }
 
@@ -52,12 +53,16 @@ cleanup() {
   fi
 }
 trap cleanup EXIT
-mkdir -p "$BUILDTMP/userpatches/overlay/etc"
+mkdir -p "$BUILDTMP/userpatches/overlay/"
 
+if [[ "$BOARD" == "openwb-display" ]]; then
+  OPENWB_DISPLAY="true"
+fi
 
-# Exported to the chroot via /etc/evcc-image.env
-cat >"$BUILDTMP/userpatches/overlay/etc/evcc-image.env" <<ENV
+# Exported to the chroot via /tmp/overlay/evcc-image.env
+cat >"$BUILDTMP/userpatches/overlay/evcc-image.env" <<ENV
 EVCC_HOSTNAME=${HOSTNAME}
+OPENWB_DISPLAY=${OPENWB_DISPLAY}
 ENV
 
 # Copy our customize script and auxiliary files
@@ -74,7 +79,7 @@ if [[ "$(uname)" == "Darwin" ]]; then
 else
   BUILD_DIR="$BUILDTMP/build"
 fi
-git clone --depth=1 --branch v25.8.1 https://github.com/armbian/build.git "$BUILD_DIR"
+git clone --depth=1 --branch v25.8.2 https://github.com/armbian/build.git "$BUILD_DIR"
 
 # Place our userpatches into the build tree
 rm -rf "$BUILD_DIR/userpatches"
@@ -87,22 +92,7 @@ echo "Removing problematic rkvdec patches..."
 find "$BUILD_DIR/patch" -name "*general-v4l2-rkvdec*" -type f -exec rm -v {} \; 2>/dev/null || true
 
 pushd "$BUILD_DIR" >/dev/null
-  EXPERT=yes \
-  SKIP_LOG_ARCHIVE=yes \
-  SHARE_LOG=yes \
-  USE_TORRENT=no \
-  OFFLINE_WORK=no \
-  VENDOR="evcc" \
-  VENDORURL="https://evcc.io" \
-  IMAGE_SUFFIX="evcc-${RELEASE_NAME}" \
-  ./compile.sh \
-    BOARD="$BOARD" \
-    BRANCH=current \
-    RELEASE="bookworm" \
-    BUILD_MINIMAL=no \
-    BUILD_DESKTOP=no \
-    KERNEL_CONFIGURE=no \
-    COMPRESS_OUTPUTIMAGE=sha,zip
+  ./compile.sh $BOARD 
 popd >/dev/null
 
 # Copy results to output directory
@@ -114,7 +104,7 @@ fi
 
 # Rename outputs to armbian_evcc-[release-name]_[board].img[...]
 shopt -s nullglob
-for f in "$IMAGE_OUT_DIR"/Armbian-*; do
+for f in "$IMAGE_OUT_DIR"/evcc_*; do
   base_ext="${f##*.}"
   if [[ "$f" == *.img ]]; then
     mv -f "$f" "$IMAGE_OUT_DIR/armbian_evcc-${RELEASE_NAME}_${BOARD}.img"
