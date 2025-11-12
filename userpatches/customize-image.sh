@@ -24,9 +24,10 @@ fi
 export EVCC_HOSTNAME=${EVCC_HOSTNAME:-evcc}
 export TIMEZONE=${TIMEZONE:-Europe/Berlin}
 export DEBIAN_FRONTEND=noninteractive
+export OPENWB=${OPENWB:-false}
 export OPENWB_DISPLAY=${OPENWB_DISPLAY:-false}
 
-echo "[customize-image] hostname=$EVCC_HOSTNAME tz=$TIMEZONE openwb display=$OPENWB_DISPLAY"
+echo "[customize-image] hostname=$EVCC_HOSTNAME tz=$TIMEZONE openwb=$OPENWB display=$OPENWB_DISPLAY"
 
 # ============================================================================
 # SYSTEM SETUP
@@ -76,7 +77,7 @@ fi
 groupadd --system gpio
 
 echo 'admin:admin' | chpasswd
-usermod -aG sudo,netdev,video,render admin  # video, render are required for starting labwc/wayland
+usermod -aG sudo,netdev admin
 
 # Enable mDNS service
 systemctl enable avahi-daemon || true
@@ -234,14 +235,16 @@ NMCONF
 if [[ "$OPENWB_DISPLAY" == "true" ]]; then
 	echo "[customize-image] OpenWB with display customizations"
 	apt-get install -y --no-install-recommends labwc wayfire seatd xdg-user-dirs firefox-esr swayidle wlopm
-	
-	mkdir -p /home/admin/.config/labwc || true
+
+	usermod -aG video,render admin  # video, render are required for starting labwc/wayland
+
+	mkdir -p /home/admin/.config/labwc
 	cat >/home/admin/.config/labwc/autostart <<-'LABWCAUTOSTART'
 	/usr/bin/firefox --kiosk http://localhost:7070/ &
 	/usr/bin/swayidle -w timeout 600 'wlopm --off \*' resume 'wlopm --on \*' &
 	LABWCAUTOSTART
 
-	mkdir -p /home/admin/.config/systemd/user || true
+	mkdir -p /home/admin/.config/systemd/user
 	cat >/home/admin/.config/systemd/user/kiosk.service <<-'KIOSKSERVICE'
 	[Unit]
 	Description=Start Kiosk mode
@@ -253,11 +256,11 @@ if [[ "$OPENWB_DISPLAY" == "true" ]]; then
 	KIOSKSERVICE
 
 	# Enable auto-start of kiosk mode
-	mkdir -p /home/admin/.config/systemd/user/default.target.wants || true
-	ln -sf /home/admin/.config/systemd/user/kiosk.service /home/admin/.config/systemd/user/default.target.wants/kiosk.service || true
+	mkdir -p /home/admin/.config/systemd/user/default.target.wants
+	ln -sf /home/admin/.config/systemd/user/kiosk.service /home/admin/.config/systemd/user/default.target.wants/kiosk.service
 	
 	# Fake loginctl enable-linger admin
-	mkdir -p /var/lib/systemd/linger/ || true
+	mkdir -p /var/lib/systemd/linger/
 	touch /var/lib/systemd/linger/admin
 fi
 
@@ -281,15 +284,73 @@ apt-get install -y evcc
 
 # Pre-generate minimal config if missing
 if [[ ! -f /etc/evcc.yaml ]]; then
-	cat >/etc/evcc.yaml <<YAML
+	if [[ "$OPENWB" == "true" ]]; then
+		cat >/etc/evcc.yaml <<YAML
 network:
   schema: http
   host: ${EVCC_HOSTNAME}.local
-YAML
-fi
 
-# Add necessary groups to allow user evcc to access OpenWB HW
-usermod -aG dialout,input,gpio evcc
+# Device used for meters and chargers can be either /dev/ttyUSB0 or /dev/ttyACM0 depending on installed modbus converter
+meters:      # Uncomment one of the following meters depending on which one is installed in your OpenWB
+- type: template
+  template: abb-ab
+  id: 201
+  device: /dev/ttyUSB0
+  baudrate: 9600
+  comset: 8N1
+  usage: charge
+  modbus: rs485serial
+  name: openwb-meter
+#- type: template
+#  template: mpm3pm
+#  id: 5
+#  device: /dev/ttyUSB0
+#  baudrate: 9600
+#  comset: 8N1
+#  usage: charge
+#  modbus: rs485serial
+#  name: openwb-meter
+#- type: template
+#  template: eastron
+#  id: 105
+#  device: /dev/ttyUSB0
+#  baudrate: 9600
+#  comset: 8N1
+#  usage: charge
+#  modbus: rs485serial
+#  name: openwb-meter
+
+chargers:
+- type: template
+  template: openwb-native
+  modbus: rs485serial
+  id: 1                   # EVSE is on Modbus Id 1
+  device: /dev/ttyUSB0
+  baudrate: 9600
+  comset: 8N1
+  name: openwb-charger
+  phases1p3p: true
+
+loadpoints:
+- title: MyLoadpoint
+  charger: openwb-charger
+  meter: openwb-meter
+
+site:
+  title: MyHome
+YAML
+
+		# Add necessary groups to allow user evcc to access OpenWB HW
+		usermod -aG dialout,input,gpio evcc
+
+	else
+		cat >/etc/evcc.yaml <<YAML
+network:
+  schema: https
+  host: ${EVCC_HOSTNAME}.local
+YAML
+	fi
+fi
 
 # Enable evcc service
 systemctl enable evcc || true

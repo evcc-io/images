@@ -55,6 +55,10 @@ cleanup() {
 trap cleanup EXIT
 mkdir -p "$BUILDTMP/userpatches/overlay/"
 
+if [[ "$BOARD" =~ ^openwb.* ]]; then
+  OPENWB="true"
+fi
+
 if [[ "$BOARD" == "openwb-display" ]]; then
   OPENWB_DISPLAY="true"
 fi
@@ -62,6 +66,7 @@ fi
 # Exported to the chroot via /tmp/overlay/evcc-image.env
 cat >"$BUILDTMP/userpatches/overlay/evcc-image.env" <<ENV
 EVCC_HOSTNAME=${HOSTNAME}
+OPENWB=${OPENWB}
 OPENWB_DISPLAY=${OPENWB_DISPLAY}
 ENV
 
