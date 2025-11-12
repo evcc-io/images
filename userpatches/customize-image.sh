@@ -287,7 +287,7 @@ if [[ ! -f /etc/evcc.yaml ]]; then
 	if [[ "$OPENWB" == "true" ]]; then
 		cat >/etc/evcc.yaml <<YAML
 network:
-  schema: http
+  schema: https
   host: ${EVCC_HOSTNAME}.local
 
 # Device used for meters and chargers can be either /dev/ttyUSB0 or /dev/ttyACM0 depending on installed modbus converter
@@ -346,8 +346,8 @@ YAML
 	else
 		cat >/etc/evcc.yaml <<YAML
 network:
-  schema: https
-  host: ${EVCC_HOSTNAME}.local
+  schema: httpslocal
+  host: ${EVCC_HOSTNAME}.
 YAML
 	fi
 fi
