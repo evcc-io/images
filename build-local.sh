@@ -24,8 +24,10 @@ Examples:
   ./build-local.sh --board nanopi-r3s
 
 Supported boards:
-  - rpi4b        Raspberry Pi 4B
-  - nanopi-r3s   NanoPi R3S
+  - rpi4b          Raspberry Pi 4B
+  - nanopi-r3s     NanoPi R3S
+  - openwb         OpenWB without display
+  - openwb-display OpenWB with display
 
 EOF
 }
@@ -57,12 +59,12 @@ check_requirements() {
 
 validate_board() {
   case "$BOARD" in
-    rpi4b|nanopi-r3s)
+    rpi4b|nanopi-r3s|openwb|openwb-display)
       echo "✅ Board '$BOARD' is supported"
       ;;
     *)
       echo "❌ Unsupported board: '$BOARD'"
-      echo "Supported boards: rpi4b, nanopi-r3s"
+      echo "Supported boards: rpi4b, nanopi-r3s, openwb, openwb-display"
       exit 1
       ;;
   esac
