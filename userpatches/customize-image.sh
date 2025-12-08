@@ -10,26 +10,24 @@ echo "[customize-image] starting"
 echo "[customize-image] loading environment variables"
 
 # Load parameters injected by outer build script
-ENV_FILE="/evcc-image.env"
-if [[ -f /userpatches/evcc-image.env ]]; then
-  cp /userpatches/evcc-image.env "$ENV_FILE"
-elif [[ -f /etc/evcc-image.env ]]; then
-  cp /etc/evcc-image.env "$ENV_FILE"
-fi
+ENV_FILE="/tmp/overlay/evcc-image.env"
 
 if [[ -f "$ENV_FILE" ]]; then
-  set -a
-  # shellcheck disable=SC1090
-  source "$ENV_FILE"
-  set +a
+	echo "[customize-image] Sourcing environment file"
+	set -a
+	# shellcheck disable=SC1090
+	source "$ENV_FILE"
+	set +a
 fi
 
 # Set defaults
 export EVCC_HOSTNAME=${EVCC_HOSTNAME:-evcc}
 export TIMEZONE=${TIMEZONE:-Europe/Berlin}
 export DEBIAN_FRONTEND=noninteractive
+export OPENWB=${OPENWB:-false}
+export OPENWB_DISPLAY=${OPENWB_DISPLAY:-false}
 
-echo "[customize-image] hostname=$EVCC_HOSTNAME tz=$TIMEZONE"
+echo "[customize-image] hostname=$EVCC_HOSTNAME tz=$TIMEZONE openwb=$OPENWB display=$OPENWB_DISPLAY"
 
 # ============================================================================
 # SYSTEM SETUP
@@ -42,9 +40,9 @@ apt-get -y full-upgrade
 
 # Install base utils and mdns (avahi)
 apt-get install -y --no-install-recommends \
-  curl ca-certificates gnupg apt-transport-https \
-  avahi-daemon avahi-utils libnss-mdns \
-  sudo python3-gi python3-dbus
+	curl ca-certificates gnupg apt-transport-https \
+	avahi-daemon avahi-utils libnss-mdns \
+	sudo python3-gi python3-dbus
 
 # Set timezone
 apt-get install -y --no-install-recommends tzdata
@@ -72,29 +70,14 @@ rm -f /root/.not_logged_in_yet || true
 
 # Create admin user with initial password and require password change on first login
 if ! id -u admin >/dev/null 2>&1; then
-  useradd -M -s /bin/bash admin  # -M to skip home directory creation
+	useradd -s /bin/bash admin 
 fi
+
+# Add missing gpio group, which is actually used by udev already to set the gpio permissions correctly
+groupadd --system gpio
+
 echo 'admin:admin' | chpasswd
-chage -d 0 admin || true
-usermod -aG sudo,netdev admin || true
-
-# Create home directory on first boot (since it doesn't persist during build)
-cat >/etc/systemd/system/admin-home-setup.service <<'EOF'
-[Unit]
-Description=Create admin home directory on first boot
-ConditionPathExists=!/home/admin
-Before=getty@tty1.service ssh.service
-
-[Service]
-Type=oneshot
-RemainAfterExit=yes
-ExecStart=/bin/bash -c 'mkdir -p /home/admin && cp -r /etc/skel/. /home/admin/ 2>/dev/null || true && chown -R admin:admin /home/admin && chmod 755 /home/admin'
-
-[Install]
-WantedBy=multi-user.target
-EOF
-
-systemctl enable admin-home-setup.service
+usermod -aG sudo,netdev admin
 
 # Enable mDNS service
 systemctl enable avahi-daemon || true
@@ -110,7 +93,7 @@ echo "[customize-image] setting up comitup for wifi configuration"
 
 # Install latest comitup from official repository (fixes device type compatibility)
 curl -L -o /tmp/davesteele-comitup-apt-source.deb \
-  "https://davesteele.github.io/comitup/deb/davesteele-comitup-apt-source_1.3_all.deb"
+	"https://davesteele.github.io/comitup/deb/davesteele-comitup-apt-source_1.3_all.deb"
 dpkg -i /tmp/davesteele-comitup-apt-source.deb || apt-get install -f -y
 apt-get update
 apt-get install -y --no-install-recommends comitup
@@ -161,56 +144,56 @@ INTERNET_AVAILABLE=false
 # Check 1: NetworkManager connectivity (accept both 'full' and 'portal')
 CONNECTIVITY=$(nmcli networking connectivity check 2>/dev/null)
 if echo "$CONNECTIVITY" | grep -qE 'full|portal'; then
-    INTERNET_AVAILABLE=true
-    echo "NetworkManager reports connectivity: $CONNECTIVITY"
+		INTERNET_AVAILABLE=true
+		echo "NetworkManager reports connectivity: $CONNECTIVITY"
 fi
 
 # Check 2: Ping test as fallback
 if [[ "$INTERNET_AVAILABLE" == "false" ]]; then
-    if ping -c 1 -W 5 8.8.8.8 >/dev/null 2>&1; then
-        INTERNET_AVAILABLE=true
-        echo "Ping test confirms internet connectivity"
-    fi
+		if ping -c 1 -W 5 8.8.8.8 >/dev/null 2>&1; then
+				INTERNET_AVAILABLE=true
+				echo "Ping test confirms internet connectivity"
+		fi
 fi
 
 # Start AP only if no internet detected AND WiFi hardware exists
 if [[ "$INTERNET_AVAILABLE" == "false" ]]; then
-    # Check if WiFi hardware exists
-    if ls /sys/class/net/wl* >/dev/null 2>&1 || iwconfig 2>/dev/null | grep -q "IEEE 802.11"; then
-        # Unmask comitup first in case it was masked from previous boot
-        systemctl unmask comitup.service >/dev/null 2>&1 || true
-        systemctl enable comitup.service >/dev/null 2>&1 || true
-        systemctl start comitup.service >/dev/null 2>&1 || true
-        echo "No internet detected - WiFi setup AP started"
-    else
-        echo "No internet detected but no WiFi hardware found - skipping WiFi setup"
-    fi
+		# Check if WiFi hardware exists
+		if ls /sys/class/net/wl* >/dev/null 2>&1 || iwconfig 2>/dev/null | grep -q "IEEE 802.11"; then
+				# Unmask comitup first in case it was masked from previous boot
+				systemctl unmask comitup.service >/dev/null 2>&1 || true
+				systemctl enable comitup.service >/dev/null 2>&1 || true
+				systemctl start comitup.service >/dev/null 2>&1 || true
+				echo "No internet detected - WiFi setup AP started"
+		else
+				echo "No internet detected but no WiFi hardware found - skipping WiFi setup"
+		fi
 else
-    # Internet available - ensure comitup is stopped and cleanup hotspot
-    echo "Stopping comitup service..."
-    
-    # First try graceful stop with timeout
-    timeout 10 systemctl stop comitup.service 2>&1 || {
-        echo "Graceful stop failed, forcing kill..."
-        systemctl kill comitup.service 2>&1 || true
-        sleep 2
-    }
-    
-    # Reset any failed state before disabling
-    systemctl reset-failed comitup.service 2>&1 || true
-    
-    # Just disable, don't mask - this prevents "failed" status in Cockpit
-    systemctl disable comitup.service 2>&1 || echo "Disable failed"
-    
-    # Clean up any active hotspot connections
-    HOTSPOT_CONN=$(nmcli -t -f NAME connection show --active | grep "evcc-setup" || true)
-    if [[ -n "$HOTSPOT_CONN" ]]; then
-        echo "Cleaning up hotspot connection: $HOTSPOT_CONN"
-        nmcli connection down "$HOTSPOT_CONN" 2>/dev/null || true
-        nmcli connection delete "$HOTSPOT_CONN" 2>/dev/null || true
-    fi
-    
-    echo "Internet available - WiFi setup stopped"
+		# Internet available - ensure comitup is stopped and cleanup hotspot
+		echo "Stopping comitup service..."
+		
+		# First try graceful stop with timeout
+		timeout 10 systemctl stop comitup.service 2>&1 || {
+				echo "Graceful stop failed, forcing kill..."
+				systemctl kill comitup.service 2>&1 || true
+				sleep 2
+		}
+		
+		# Reset any failed state before disabling
+		systemctl reset-failed comitup.service 2>&1 || true
+		
+		# Just disable, don't mask - this prevents "failed" status in Cockpit
+		systemctl disable comitup.service 2>&1 || echo "Disable failed"
+		
+		# Clean up any active hotspot connections
+		HOTSPOT_CONN=$(nmcli -t -f NAME connection show --active | grep "evcc-setup" || true)
+		if [[ -n "$HOTSPOT_CONN" ]]; then
+				echo "Cleaning up hotspot connection: $HOTSPOT_CONN"
+				nmcli connection down "$HOTSPOT_CONN" 2>/dev/null || true
+				nmcli connection delete "$HOTSPOT_CONN" 2>/dev/null || true
+		fi
+		
+		echo "Internet available - WiFi setup stopped"
 fi
 WIFISETUP
 
@@ -246,6 +229,47 @@ uri=http://detectportal.firefox.com/canonical.html
 interval=300
 NMCONF
 
+# ============================================================================
+# Setup for OpenWB with display 
+# ============================================================================
+if [[ "$OPENWB_DISPLAY" == "true" ]]; then
+	echo "[customize-image] OpenWB with display customizations"
+	apt-get install -y --no-install-recommends labwc wayfire seatd xdg-user-dirs firefox-esr swayidle wlopm
+
+	usermod -aG video,render admin  # video, render are required for starting labwc/wayland
+
+	mkdir -p /home/admin/.config/labwc
+	cat >/home/admin/.config/labwc/autostart <<-'LABWCAUTOSTART'
+	/usr/bin/firefox --kiosk http://localhost:7070/ &
+	/usr/bin/swayidle -w timeout 600 'wlopm --off \*' resume 'wlopm --on \*' &
+	LABWCAUTOSTART
+
+	mkdir -p /home/admin/.config/systemd/user
+	cat >/home/admin/.config/systemd/user/kiosk.service <<-'KIOSKSERVICE'
+	[Unit]
+	Description=Start Kiosk mode
+	[Service]
+	Type=simple
+	ExecStart=/usr/bin/labwc
+	[Install]
+	WantedBy=default.target
+	KIOSKSERVICE
+
+	# Enable auto-start of kiosk mode
+	mkdir -p /home/admin/.config/systemd/user/default.target.wants
+	ln -sf /home/admin/.config/systemd/user/kiosk.service /home/admin/.config/systemd/user/default.target.wants/kiosk.service
+	
+	# Fake loginctl enable-linger admin
+	mkdir -p /var/lib/systemd/linger/
+	touch /var/lib/systemd/linger/admin
+fi
+
+# ============================================================================
+# Fix homedirectory permissions
+# ============================================================================
+cp -r /etc/skel/. /home/admin/ 2>/dev/null 
+chown -R admin:admin /home/admin
+chmod 755 /home/admin
 
 # ============================================================================
 # EVCC SETUP
@@ -260,11 +284,72 @@ apt-get install -y evcc
 
 # Pre-generate minimal config if missing
 if [[ ! -f /etc/evcc.yaml ]]; then
-  cat >/etc/evcc.yaml <<YAML
+	if [[ "$OPENWB" == "true" ]]; then
+		cat >/etc/evcc.yaml <<YAML
 network:
   schema: https
   host: ${EVCC_HOSTNAME}.local
+
+# Device used for meters and chargers can be either /dev/ttyUSB0 or /dev/ttyACM0 depending on installed modbus converter
+meters:      # Uncomment one of the following meters depending on which one is installed in your OpenWB
+- type: template
+  template: abb-ab
+  id: 201
+  device: /dev/ttyUSB0
+  baudrate: 9600
+  comset: 8N1
+  usage: charge
+  modbus: rs485serial
+  name: openwb-meter
+#- type: template
+#  template: mpm3pm
+#  id: 5
+#  device: /dev/ttyUSB0
+#  baudrate: 9600
+#  comset: 8N1
+#  usage: charge
+#  modbus: rs485serial
+#  name: openwb-meter
+#- type: template
+#  template: eastron
+#  id: 105
+#  device: /dev/ttyUSB0
+#  baudrate: 9600
+#  comset: 8N1
+#  usage: charge
+#  modbus: rs485serial
+#  name: openwb-meter
+
+chargers:
+- type: template
+  template: openwb-native
+  modbus: rs485serial
+  id: 1                   # EVSE is on Modbus Id 1
+  device: /dev/ttyUSB0
+  baudrate: 9600
+  comset: 8N1
+  name: openwb-charger
+  phases1p3p: true
+
+loadpoints:
+- title: MyLoadpoint
+  charger: openwb-charger
+  meter: openwb-meter
+
+site:
+  title: MyHome
 YAML
+
+		# Add necessary groups to allow user evcc to access OpenWB HW
+		usermod -aG dialout,input,gpio evcc
+
+	else
+		cat >/etc/evcc.yaml <<YAML
+network:
+  schema: httpslocal
+  host: ${EVCC_HOSTNAME}.
+YAML
+	fi
 fi
 
 # Enable evcc service
@@ -277,17 +362,17 @@ echo "[customize-image] setting up cockpit"
 
 # Add AllStarLink repository for cockpit-wifimanager
 curl -L -o /tmp/asl-apt-repos.deb12_all.deb \
-  "https://repo.allstarlink.org/public/asl-apt-repos.deb12_all.deb"
+	"https://repo.allstarlink.org/public/asl-apt-repos.deb12_all.deb"
 dpkg -i /tmp/asl-apt-repos.deb12_all.deb || apt-get install -f -y
 apt-get update
 rm -f /tmp/asl-apt-repos.deb12_all.deb
 
 # Install Cockpit and related packages
 apt-get install -y --no-install-recommends \
-  cockpit cockpit-pcp \
-  packagekit cockpit-packagekit \
-  cockpit-networkmanager \
-  cockpit-wifimanager
+	cockpit cockpit-pcp \
+	packagekit cockpit-packagekit \
+	cockpit-networkmanager \
+	cockpit-wifimanager
 
 # Cockpit configuration
 mkdir -p /etc/cockpit
@@ -302,9 +387,9 @@ mkdir -p /etc/polkit-1/rules.d
 cat >/etc/polkit-1/rules.d/10-admin.rules <<'POLKIT'
 // Admin user has full system access without password prompts
 polkit.addRule(function(action, subject) {
-    if (subject.user == "admin") {
-        return polkit.Result.YES;
-    }
+		if (subject.user == "admin") {
+				return polkit.Result.YES;
+		}
 });
 POLKIT
 
@@ -324,18 +409,18 @@ apt-get install -y --no-install-recommends caddy
 mkdir -p /etc/caddy
 cat >/etc/caddy/Caddyfile <<CADDY
 {
-  email admin@example.com
-  auto_https disable_redirects
+	email admin@example.com
+	auto_https disable_redirects
 }
 
 # HTTPS on 443 with Caddy internal TLS
 https:// {
-  tls internal {
-    on_demand
-  }
-  encode zstd gzip
-  log
-  reverse_proxy 127.0.0.1:7070
+	tls internal {
+		on_demand
+	}
+	encode zstd gzip
+	log
+	reverse_proxy 127.0.0.1:7070
 }
 
 CADDY
