@@ -38,7 +38,7 @@ echo "[customize-image] setting up system"
 
 # Update system packages
 apt-get update
-apt-get -y full-upgrade
+apt-get -y upgrade
 
 # Install base utils and mdns (avahi)
 apt-get install -y --no-install-recommends \
@@ -353,6 +353,15 @@ apt-get install -y --no-install-recommends unattended-upgrades
 echo 'APT::Periodic::Unattended-Upgrade "1";' > /etc/apt/apt.conf.d/20auto-upgrades
 
 echo "[customize-image] unattended security updates enabled"
+
+# ============================================================================
+# BRANDING
+# ============================================================================
+echo "[customize-image] customizing branding"
+
+if [[ -f /etc/os-release ]]; then
+  sed -i 's/Armbian-unofficial/Armbian/g' /etc/os-release
+fi
 
 # ============================================================================
 # CLEANUP

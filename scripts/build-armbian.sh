@@ -74,17 +74,13 @@ if [[ "$(uname)" == "Darwin" ]]; then
 else
   BUILD_DIR="$BUILDTMP/build"
 fi
-git clone --depth=1 --branch v25.8.1 https://github.com/armbian/build.git "$BUILD_DIR"
+git clone --depth=1 --branch v25.11.1 https://github.com/armbian/build.git "$BUILD_DIR"
 
 # Place our userpatches into the build tree
 rm -rf "$BUILD_DIR/userpatches"
 cp -a "$BUILDTMP/userpatches" "$BUILD_DIR/userpatches"
 
 echo "Starting build for board=${BOARD} release=bookworm release_name=${RELEASE_NAME} using Armbian build"
-
-# Remove problematic video decoding patches that aren't needed for evcc
-echo "Removing problematic rkvdec patches..."
-find "$BUILD_DIR/patch" -name "*general-v4l2-rkvdec*" -type f -exec rm -v {} \; 2>/dev/null || true
 
 pushd "$BUILD_DIR" >/dev/null
   EXPERT=yes \
