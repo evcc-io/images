@@ -275,6 +275,12 @@ systemctl enable evcc || true
 # ============================================================================
 echo "[customize-image] setting up cockpit"
 
+# Enable Bookworm backports for newer Cockpit version
+echo "deb http://deb.debian.org/debian bookworm-backports main" > /etc/apt/sources.list.d/cockpit-backports.list
+
+# Add 45Drives repository for cockpit-navigator
+curl -sSL https://repo.45drives.com/setup | bash
+
 # Add AllStarLink repository for cockpit-wifimanager
 curl -L -o /tmp/asl-apt-repos.deb12_all.deb \
   "https://repo.allstarlink.org/public/asl-apt-repos.deb12_all.deb"
@@ -282,11 +288,16 @@ dpkg -i /tmp/asl-apt-repos.deb12_all.deb || apt-get install -f -y
 apt-get update
 rm -f /tmp/asl-apt-repos.deb12_all.deb
 
-# Install Cockpit and related packages
-apt-get install -y --no-install-recommends \
-  cockpit cockpit-pcp \
+# Install Cockpit and related packages from backports
+# Note: cockpit-pcp functionality is now built into cockpit-bridge in version 337+
+apt-get install -y --no-install-recommends -t bookworm-backports \
+  cockpit \
   packagekit cockpit-packagekit \
-  cockpit-networkmanager \
+  cockpit-networkmanager
+
+# Install cockpit-navigator and cockpit-wifimanager from their respective repos
+apt-get install -y --no-install-recommends \
+  cockpit-navigator \
   cockpit-wifimanager
 
 # Cockpit configuration
@@ -332,6 +343,7 @@ cat >/etc/caddy/Caddyfile <<CADDY
 https:// {
   tls internal {
     on_demand
+    skip_install_trust
   }
   encode zstd gzip
   log
