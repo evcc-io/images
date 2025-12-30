@@ -47,9 +47,26 @@ For more detailed instructions, see the [full documentation](https://docs.evcc.i
 ✅ tested<br/>
 ⚠️ untested (but should work)
 
-## FAQ
+## Available Services
 
-### How do I access system administration?
+| Service    | Port | Protocol | URL                                 |
+| ---------- | ---- | -------- | ----------------------------------- |
+| evcc UI    | 443  | HTTPS    | `https://evcc.local/`               |
+| OCPP       | 8887 | WSS      | `wss://evcc.local:8887/<stationid>` |
+| Cockpit UI | 9090 | HTTPS    | `https://evcc.local:9090/`          |
+
+**Note:** The above services use self-signed certificates.
+You'll need to accept the certificate warning in your browser, or disable certificate verification in your EV charger's OCPP configuration.
+If you have compatibility problems, use the unencrypted alternatives below:
+
+| Service | Port | Protocol | URL                                |
+| ------- | ---- | -------- | ---------------------------------- |
+| evcc UI | 7070 | HTTP     | `http://evcc.local:7070/`          |
+| OCPP    | 8886 | WS       | `ws://evcc.local:8886/<stationid>` |
+
+## Administration
+
+### Cockpit UI
 
 Login to the Cockpit web console on [`https://evcc.local:9090/`](https://evcc.local:9090/)
 
@@ -62,12 +79,12 @@ You can see system health, update packages and run terminal commands.
 
 Alternatively: connect via SSH `ssh admin@evcc.local`
 
-### How do I update evcc?
+### Updating evcc
 
 Login to Cockpit ([`https://evcc.local:9090/`](https://evcc.local:9090/)) and click on **Software updates** in the left navigation.
 Update evcc (and other packages) as needed.
 
-### How do I run evcc nightly builds?
+### Nightly Builds
 
 The image uses the stable evcc version by default.
 To switch to nightly builds, login to Cockpit ([`https://evcc.local:9090/`](https://evcc.local:9090/)), click on **Terminal** in the left navigation, and run these commands:

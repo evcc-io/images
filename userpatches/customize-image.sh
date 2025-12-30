@@ -258,14 +258,14 @@ curl -1sLf 'https://dl.evcc.io/public/evcc/stable/setup.deb.sh' | bash -E
 apt-get update
 apt-get install -y evcc
 
-# Pre-generate minimal config if missing
-if [[ ! -f /etc/evcc.yaml ]]; then
-  cat >/etc/evcc.yaml <<YAML
-network:
-  schema: https
-  host: ${EVCC_HOSTNAME}.local
-YAML
-fi
+# Configure evcc via systemd environment variables
+mkdir -p /etc/systemd/system/evcc.service.d
+cat >/etc/systemd/system/evcc.service.d/override.conf <<EVCCCONF
+[Service]
+Environment="EVCC_NETWORK_HOST=${EVCC_HOSTNAME}.local"
+Environment="EVCC_NETWORK_EXTERNALURL=https://${EVCC_HOSTNAME}.local"
+Environment="EVCC_OCPP_PORT=8886"
+EVCCCONF
 
 # Enable evcc service
 systemctl enable evcc || true
@@ -348,6 +348,15 @@ https:// {
   encode zstd gzip
   log
   reverse_proxy 127.0.0.1:7070
+}
+
+# OCPP port forwarding: 8886 (HTTP) -> 8887 (HTTPS)
+:8887 {
+  tls internal {
+    protocols tls1.2 tls1.3
+  }
+  log
+  reverse_proxy 127.0.0.1:8886
 }
 
 CADDY
