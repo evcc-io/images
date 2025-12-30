@@ -337,13 +337,13 @@ cat >/etc/caddy/Caddyfile <<CADDY
 {
   email admin@example.com
   auto_https disable_redirects
+  skip_install_trust
 }
 
 # HTTPS on 443 with Caddy internal TLS
 https:// {
   tls internal {
     on_demand
-    skip_install_trust
   }
   encode zstd gzip
   log
