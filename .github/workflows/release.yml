@@ -1,5 +1,8 @@
 name: Create Release
 
+permissions:
+  contents: write
+
 on:
   schedule:
     # Run every Monday at 2am UTC
