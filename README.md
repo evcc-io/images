@@ -2,19 +2,23 @@
 
 [![Built with Depot](https://depot.dev/badges/built-with-depot.svg)](https://depot.dev/?utm_source=evcc)
 
-> **📦 Beta Release**  
-> These images are working well but we're still in beta. Please [report any issues](https://github.com/evcc-io/images/issues) to help us reach stable.
+**✨ This is the recommended way for beginners to install evcc.**
 
-Repository for ready-to-use Debian-based [evcc](https://evcc.io) images for popular single-board computers like Raspberry Pi and NanoPi.
+Repository for ready-to-use [evcc](https://evcc.io) linux images for popular single-board computers like Raspberry Pi and NanoPi.
 
 ## Image contents
 
-- ☀️🚗 [evcc](https://evcc.io) for smart energy management
-- 🔒 [Caddy](https://caddyserver.com) reverse proxy for HTTPS
-- 🛠️ [Cockpit](https://cockpit-project.org) web console for administration
-- 📶 [comitup](https://github.com/davesteele/comitup) for WiFi setup without ethernet
-- 🐧 [Armbian](https://www.armbian.com) base image and build system
-- 🔐 Automatic security updates enabled (Debian security patches)
+- ☀️🚗 [evcc](https://evcc.io) for smart energy management (stable version)
+- 🔒 Secure by default with HTTPS ([Caddy](https://caddyserver.com))
+- 📶 WiFi setup hotspot (via [comitup](https://github.com/davesteele/comitup)), optional
+- 🛠️ System management UI ([Cockpit](https://cockpit-project.org))
+  - Terminal
+  - Package updates
+  - Network configuration
+  - User management
+  - System logs
+- 🛡️ Automatic security updates (Debian patches, checked daily)
+- 🐧 Based on [Armbian](https://www.armbian.com)
 
 ## Getting Started
 
@@ -25,14 +29,7 @@ Repository for ready-to-use Debian-based [evcc](https://evcc.io) images for popu
 5. You should see the evcc web interface.
 6. Alternatively: Use the [evcc iOS/Android app](http://github.com/evcc-io/app) to connect to your evcc instance.
 
-## Administration
-
-- Login into the [Cockpit](https://cockpit-project.org) web console on `https://evcc.local:9090/`
-  - username `admin`
-  - password `admin`
-- You'll be prompted to change your password. **Remember the new password.** There is no reset.
-- You can see system health, update packages and run terminal commands.
-- Alternatively: connect via SSH `ssh admin@evcc.local`
+For more detailed instructions, see the [full documentation](https://docs.evcc.io/docs/installation/linux-image).
 
 ## Supported Boards
 
@@ -46,6 +43,53 @@ Repository for ready-to-use Debian-based [evcc](https://evcc.io) images for popu
 
 ✅ tested<br/>
 ⚠️ untested (but should work)
+
+## FAQ
+
+### How do I access system administration?
+
+Login to the Cockpit web console on [`https://evcc.local:9090/`](https://evcc.local:9090/)
+
+- username `admin`
+- password `admin`
+
+You'll be prompted to change your password. **Remember the new password.** There is no reset.
+
+You can see system health, update packages and run terminal commands.
+
+Alternatively: connect via SSH `ssh admin@evcc.local`
+
+### How do I update evcc?
+
+Login to Cockpit ([`https://evcc.local:9090/`](https://evcc.local:9090/)) and click on **Software updates** in the left navigation.
+Update evcc (and other packages) as needed.
+
+### How do I run evcc nightly builds?
+
+The image uses the stable evcc version by default.
+To switch to nightly builds, login to Cockpit ([`https://evcc.local:9090/`](https://evcc.local:9090/)), click on **Terminal** in the left navigation, and run these commands:
+
+```bash
+# Add the nightly repository
+curl -1sLf 'https://dl.evcc.io/public/evcc/unstable/setup.deb.sh' | sudo -E bash
+
+# Update and upgrade to nightly
+sudo apt update
+sudo apt upgrade -y
+```
+
+To switch back to stable:
+
+```bash
+# Remove nightly repository
+sudo rm /etc/apt/sources.list.d/evcc-unstable.list
+
+# Reinstall stable version
+sudo apt update
+sudo apt install --reinstall evcc
+```
+
+For more details, see the [Linux installation documentation](https://docs.evcc.io/docs/installation/linux).
 
 ## Hardware Recommendations
 
