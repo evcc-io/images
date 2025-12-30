@@ -18,6 +18,7 @@ Repository for ready-to-use [evcc](https://evcc.io) linux images for popular sin
   - Package updates
   - Network configuration
   - User management
+  - File navigator
   - System logs
 - 🛡️ Automatic security updates (Debian patches, checked daily)
 - 🐧 Based on [Armbian](https://www.armbian.com)
