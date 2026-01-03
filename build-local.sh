@@ -23,12 +23,12 @@ Examples:
   ./build-local.sh --board rpi4b
   ./build-local.sh --board nanopi-r3s
 
-Supported boards:
-  - rpi4b        Raspberry Pi 4B
-  - nanopi-r3s   NanoPi R3S
+Supported boards: ${BOARDLIST[@]}
 
 EOF
 }
+
+source ${SCRIPT_DIR}/scripts/helper-functions.sh
 
 check_requirements() {
   echo "🔍 Checking requirements..."
@@ -56,16 +56,14 @@ check_requirements() {
 }
 
 validate_board() {
-  case "$BOARD" in
-    rpi4b|nanopi-r3s)
-      echo "✅ Board '$BOARD' is supported"
-      ;;
-    *)
-      echo "❌ Unsupported board: '$BOARD'"
-      echo "Supported boards: rpi4b, nanopi-r3s"
-      exit 1
-      ;;
-  esac
+  value="\<${BOARD}\>" 
+  if [[ ${BOARDLIST[@]} =~ $value ]]; then
+    echo "✅ Board '$BOARD' is supported"
+  else
+    echo "❌ Unsupported board: '$BOARD'"
+    echo "Supported boards: ${BOARDLIST[@]}"
+    exit 1
+  fi
 }
 
 
@@ -138,7 +136,8 @@ main() {
   echo "🔧 evcc Local Image Builder"
   echo "=========================="
   echo ""
-  
+
+  get_available_boards
   parse_args "$@"
   check_requirements
   validate_board
