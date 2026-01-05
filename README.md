@@ -36,16 +36,12 @@ For more detailed instructions, see the [full documentation](https://docs.evcc.i
 
 ## Supported Boards
 
-| Name                                                                                      | Tested | WiFi     | Storage   | Image Name                                                 | Instructions                                                                                      |
-| ----------------------------------------------------------------------------------------- | ------ | -------- | --------- | ---------------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
-| [Raspberry Pi 5](https://www.raspberrypi.com/products/raspberry-pi-5/)                    | ✅     | Built-in | SD only   | [`rpi4b`](https://github.com/evcc-io/images/releases)      | see above                                                                                         |
-| [Raspberry Pi 4](https://www.raspberrypi.com/products/raspberry-pi-4-model-b/)            | ✅     | Built-in | SD only   | [`rpi4b`](https://github.com/evcc-io/images/releases)      | see above                                                                                         |
-| [Raspberry Pi 3b](https://www.raspberrypi.com/products/raspberry-pi-3-model-b/)           | ✅     | Built-in | SD only   | [`rpi4b`](https://github.com/evcc-io/images/releases)      | see above                                                                                         |
-| [Raspberry Pi Zero 2 W](https://www.raspberrypi.com/products/raspberry-pi-zero-2-w/)      | ✅     | Built-in | SD only   | [`rpi4b`](https://github.com/evcc-io/images/releases)      | see above                                                                                         |
-| [NanoPi R3S](https://www.friendlyelec.com/index.php?route=product/product&product_id=311) | ✅     | via USB  | eMMC & SD | [`nanopi-r3s`](https://github.com/evcc-io/images/releases) | see above, [then copy to eMMC](https://docs.armbian.com/User-Guide_Getting-Started/#installation) |
+| Name                                                                                      | WiFi     | Storage   | Image Name                                                 | Instructions                                                                                      |
+| ----------------------------------------------------------------------------------------- | -------- | --------- | ---------------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
+| [Raspberry Pi](https://www.raspberrypi.com/products/)\*                                   | Built-in | SD only   | [`rpi`](https://github.com/evcc-io/images/releases)        | see above                                                                                         |
+| [NanoPi R3S](https://www.friendlyelec.com/index.php?route=product/product&product_id=311) | via USB  | eMMC & SD | [`nanopi-r3s`](https://github.com/evcc-io/images/releases) | see above, [then copy to eMMC](https://docs.armbian.com/User-Guide_Getting-Started/#installation) |
 
-✅ tested<br/>
-⚠️ untested (but should work)
+\* Compatible models: 3A+, 3B, 3B+, 4, 400, 5B, CM3, CM3+, CM4, CM5, Zero 2W
 
 ## Available Services
 
@@ -173,10 +169,10 @@ git clone https://github.com/evcc-io/images.git
 cd images
 
 # Build for Raspberry Pi
-./build-local.sh --board rpi4b
+./build-local.sh --board rpi
 ```
 
-The image will be at `dist/armbian_evcc-local_rpi4b.img.zip`.
+The image will be at `dist/evcc-local_rpi.img.zip`.
 
 ## Contributing
 

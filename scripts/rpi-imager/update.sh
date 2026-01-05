@@ -35,9 +35,9 @@ fi
 RELEASE_DATE=$(echo "$RELEASE_INFO" | jq -r '.publishedAt' | cut -d'T' -f1)
 VERSION=$(echo "$LATEST_RELEASE" | sed 's/^v//')
 
-# Find the rpi4b image (which works on RPi 3, 4, and 5)
-RPI_IMAGE_ZIP=$(echo "$RELEASE_INFO" | jq -r '.assets[] | select(.name | contains("rpi4b") and contains(".img.zip")) | .name')
-RPI_IMAGE_SHA=$(echo "$RELEASE_INFO" | jq -r '.assets[] | select(.name | contains("rpi4b") and contains(".img.sha")) | .name')
+# Find the rpi image (which works on RPi 3, 4, and 5)
+RPI_IMAGE_ZIP=$(echo "$RELEASE_INFO" | jq -r '.assets[] | select(.name | contains("_rpi") and contains(".img.zip")) | .name')
+RPI_IMAGE_SHA=$(echo "$RELEASE_INFO" | jq -r '.assets[] | select(.name | contains("_rpi") and contains(".img.sha")) | .name')
 
 if [ -z "$RPI_IMAGE_ZIP" ] || [ -z "$RPI_IMAGE_SHA" ]; then
     echo "RPi image not found in release"
