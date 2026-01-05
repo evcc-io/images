@@ -5,7 +5,7 @@
       "description": "open source solar EV charging and smart heating",
       "version": "2026-01.1",
       "release_date": "2026-01-05",
-      "url": "https://github.com/evcc-io/images/releases/download/v2026-01.1/armbian_evcc-2026-01.1_rpi4b.img.zip",
+      "url": "https://github.com/evcc-io/images/releases/download/v2026-01.1/evcc_2026-01.1_rpi.img.zip",
       "extract_size": 3070230528,
       "extract_sha256": "1343fdd672e1be72ac885d8fc03b365c1af61936891d6149706a03dddec613ca",
       "image_download_size": 739199004,

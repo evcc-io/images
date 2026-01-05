@@ -16,7 +16,7 @@ on:
         type: choice
         options:
           - all
-          - rpi4b
+          - rpi
           - nanopi-r3s
       draft:
         description: "Create as draft release for testing"
@@ -42,12 +42,12 @@ jobs:
         run: |
           # For scheduled runs, build all boards
           if [[ "${{ github.event_name }}" == "schedule" ]]; then
-            MATRIX='["rpi4b","nanopi-r3s"]'
+            MATRIX='["rpi","nanopi-r3s"]'
           else
             choice='${{ inputs.board }}'
             case "$choice" in
-              all)      MATRIX='["rpi4b","nanopi-r3s"]' ;;
-              rpi4b)    MATRIX='["rpi4b"]' ;;
+              all)      MATRIX='["rpi","nanopi-r3s"]' ;;
+              rpi) MATRIX='["rpi"]' ;;
               nanopi-r3s) MATRIX='["nanopi-r3s"]' ;;
               *) echo "Unknown board: $choice" >&2; exit 1 ;;
             esac
@@ -148,7 +148,7 @@ jobs:
         with:
           upload_url: ${{ needs.prepare.outputs.release_upload_url }}
           asset_path: ${{ steps.find-files.outputs.img_zip }}
-          asset_name: armbian_evcc-${{ needs.prepare.outputs.release_name }}_${{ matrix.board }}.img.zip
+          asset_name: evcc_${{ needs.prepare.outputs.release_name }}_${{ matrix.board }}.img.zip
           asset_content_type: application/zip
 
       - name: Upload SHA file to release
@@ -158,7 +158,7 @@ jobs:
         with:
           upload_url: ${{ needs.prepare.outputs.release_upload_url }}
           asset_path: ${{ steps.find-files.outputs.sha_file }}
-          asset_name: armbian_evcc-${{ needs.prepare.outputs.release_name }}_${{ matrix.board }}.img.sha
+          asset_name: evcc_${{ needs.prepare.outputs.release_name }}_${{ matrix.board }}.img.sha
           asset_content_type: text/plain
 
       - name: Upload TXT file to release
@@ -168,5 +168,5 @@ jobs:
         with:
           upload_url: ${{ needs.prepare.outputs.release_upload_url }}
           asset_path: ${{ steps.find-files.outputs.txt_file }}
-          asset_name: armbian_evcc-${{ needs.prepare.outputs.release_name }}_${{ matrix.board }}.img.txt
+          asset_name: evcc_${{ needs.prepare.outputs.release_name }}_${{ matrix.board }}.img.txt
           asset_content_type: text/plain

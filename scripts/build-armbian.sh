@@ -14,13 +14,13 @@ RELEASE_NAME="local"
 
 usage() {
   cat <<EOF
-Usage: $0 --board <armbian-board> [--release-name <name>]
+Usage: $0 --board <board> [--release-name <name>]
 
 Examples:
-  $0 --board rpi4b
+  $0 --board rpi
   $0 --board nanopi-r3s --release-name 2025-01
 
-Supported boards are those supported by Armbian mainline (e.g. rpi4b, nanopi-r3s).
+Supported boards: rpi, nanopi-r3s
 EOF
 }
 
@@ -38,6 +38,12 @@ if [[ -z "$BOARD" ]]; then
   usage
   exit 2
 fi
+
+# Map user-facing board names to Armbian internal board names
+case "$BOARD" in
+  rpi) ARMBIAN_BOARD="rpi4b" ;;
+  *) ARMBIAN_BOARD="$BOARD" ;;
+esac
 
 mkdir -p "$REPO_ROOT/dist" "$REPO_ROOT/logs"
 
@@ -64,7 +70,7 @@ ENV
 cp -a "$REPO_ROOT/userpatches/." "$BUILDTMP/userpatches/"
 chmod +x "$BUILDTMP/userpatches/customize-image.sh" || true
 
-IMAGE_OUT_DIR="$REPO_ROOT/dist/${BOARD}"
+IMAGE_OUT_DIR="$REPO_ROOT/dist/${ARMBIAN_BOARD}"
 mkdir -p "$IMAGE_OUT_DIR"
 
 # Clone Armbian build framework and run it in Docker mode (it will build its own container image).
@@ -80,7 +86,7 @@ git clone --depth=1 --branch v25.11.1 https://github.com/armbian/build.git "$BUI
 rm -rf "$BUILD_DIR/userpatches"
 cp -a "$BUILDTMP/userpatches" "$BUILD_DIR/userpatches"
 
-echo "Starting build for board=${BOARD} release=bookworm release_name=${RELEASE_NAME} using Armbian build"
+echo "Starting build for board=${ARMBIAN_BOARD} (${BOARD}) release=bookworm release_name=${RELEASE_NAME} using Armbian build"
 
 pushd "$BUILD_DIR" >/dev/null
   EXPERT=yes \
@@ -92,7 +98,7 @@ pushd "$BUILD_DIR" >/dev/null
   VENDORURL="https://evcc.io" \
   IMAGE_SUFFIX="evcc-${RELEASE_NAME}" \
   ./compile.sh \
-    BOARD="$BOARD" \
+    BOARD="$ARMBIAN_BOARD" \
     BRANCH=current \
     RELEASE="bookworm" \
     BUILD_MINIMAL=no \
@@ -108,18 +114,18 @@ if compgen -G "$BUILD_DIR/output/images/*" > /dev/null; then
   cp -a "$BUILD_DIR/output/images/"* "$IMAGE_OUT_DIR/"
 fi
 
-# Rename outputs to armbian_evcc-[release-name]_[board].img[...]
+# Rename outputs to evcc_[release-name]_[board].img[...]
 shopt -s nullglob
 for f in "$IMAGE_OUT_DIR"/Armbian-*; do
   base_ext="${f##*.}"
   if [[ "$f" == *.img ]]; then
-    mv -f "$f" "$IMAGE_OUT_DIR/armbian_evcc-${RELEASE_NAME}_${BOARD}.img"
+    mv -f "$f" "$IMAGE_OUT_DIR/evcc_${RELEASE_NAME}_${BOARD}.img"
   elif [[ "$f" == *.img.sha ]]; then
-    mv -f "$f" "$IMAGE_OUT_DIR/armbian_evcc-${RELEASE_NAME}_${BOARD}.img.sha"
+    mv -f "$f" "$IMAGE_OUT_DIR/evcc_${RELEASE_NAME}_${BOARD}.img.sha"
   elif [[ "$f" == *.img.txt ]]; then
-    mv -f "$f" "$IMAGE_OUT_DIR/armbian_evcc-${RELEASE_NAME}_${BOARD}.img.txt"
+    mv -f "$f" "$IMAGE_OUT_DIR/evcc_${RELEASE_NAME}_${BOARD}.img.txt"
   elif [[ "$f" == *.img.zip ]]; then
-    mv -f "$f" "$IMAGE_OUT_DIR/armbian_evcc-${RELEASE_NAME}_${BOARD}.img.zip"
+    mv -f "$f" "$IMAGE_OUT_DIR/evcc_${RELEASE_NAME}_${BOARD}.img.zip"
   fi
 done
 shopt -u nullglob

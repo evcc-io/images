@@ -17,14 +17,14 @@ Usage: $0 --board <board>
 Build evcc images locally using Docker (mimics GitHub Actions workflow)
 
 Arguments:
-  --board <board>      Target board (rpi4b, nanopi-r3s)
+  --board <board>      Target board (rpi, nanopi-r3s)
 
 Examples:
-  ./build-local.sh --board rpi4b
+  ./build-local.sh --board rpi
   ./build-local.sh --board nanopi-r3s
 
 Supported boards:
-  - rpi4b        Raspberry Pi 4B
+  - rpi          Raspberry Pi
   - nanopi-r3s   NanoPi R3S
 
 EOF
@@ -57,12 +57,12 @@ check_requirements() {
 
 validate_board() {
   case "$BOARD" in
-    rpi4b|nanopi-r3s)
+    rpi|nanopi-r3s)
       echo "✅ Board '$BOARD' is supported"
       ;;
     *)
       echo "❌ Unsupported board: '$BOARD'"
-      echo "Supported boards: rpi4b, nanopi-r3s"
+      echo "Supported boards: rpi, nanopi-r3s"
       exit 1
       ;;
   esac
