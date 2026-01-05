@@ -114,18 +114,18 @@ if compgen -G "$BUILD_DIR/output/images/*" > /dev/null; then
   cp -a "$BUILD_DIR/output/images/"* "$IMAGE_OUT_DIR/"
 fi
 
-# Rename outputs to evcc-[release-name]_[board].img[...]
+# Rename outputs to evcc_[release-name]_[board].img[...]
 shopt -s nullglob
 for f in "$IMAGE_OUT_DIR"/Armbian-*; do
   base_ext="${f##*.}"
   if [[ "$f" == *.img ]]; then
-    mv -f "$f" "$IMAGE_OUT_DIR/evcc-${RELEASE_NAME}_${BOARD}.img"
+    mv -f "$f" "$IMAGE_OUT_DIR/evcc_${RELEASE_NAME}_${BOARD}.img"
   elif [[ "$f" == *.img.sha ]]; then
-    mv -f "$f" "$IMAGE_OUT_DIR/evcc-${RELEASE_NAME}_${BOARD}.img.sha"
+    mv -f "$f" "$IMAGE_OUT_DIR/evcc_${RELEASE_NAME}_${BOARD}.img.sha"
   elif [[ "$f" == *.img.txt ]]; then
-    mv -f "$f" "$IMAGE_OUT_DIR/evcc-${RELEASE_NAME}_${BOARD}.img.txt"
+    mv -f "$f" "$IMAGE_OUT_DIR/evcc_${RELEASE_NAME}_${BOARD}.img.txt"
   elif [[ "$f" == *.img.zip ]]; then
-    mv -f "$f" "$IMAGE_OUT_DIR/evcc-${RELEASE_NAME}_${BOARD}.img.zip"
+    mv -f "$f" "$IMAGE_OUT_DIR/evcc_${RELEASE_NAME}_${BOARD}.img.zip"
   fi
 done
 shopt -u nullglob

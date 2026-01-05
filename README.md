@@ -172,7 +172,7 @@ cd images
 ./build-local.sh --board rpi
 ```
 
-The image will be at `dist/evcc-local_rpi.img.zip`.
+The image will be at `dist/evcc_local_rpi.img.zip`.
 
 ## Contributing
 
