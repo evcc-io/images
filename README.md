@@ -36,12 +36,15 @@ For more detailed instructions, see the [full documentation](https://docs.evcc.i
 
 ## Supported Boards
 
-| Name                                                                                      | WiFi     | Storage   | Image Name                                                 | Instructions                                                                                      |
-| ----------------------------------------------------------------------------------------- | -------- | --------- | ---------------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
-| [Raspberry Pi](https://www.raspberrypi.com/products/)\*                                   | Built-in | SD only   | [`rpi`](https://github.com/evcc-io/images/releases)        | see above                                                                                         |
-| [NanoPi R3S](https://www.friendlyelec.com/index.php?route=product/product&product_id=311) | via USB  | eMMC & SD | [`nanopi-r3s`](https://github.com/evcc-io/images/releases) | see above, [then copy to eMMC](https://docs.armbian.com/User-Guide_Getting-Started/#installation) |
+- **Raspberry Pi 4, 5, 3B+, Zero 2W**
+  - Image: [evcc\_[version]\_rpi.img.zip](https://github.com/evcc-io/images/releases)
+  - WiFi setup: supported
+  - Storage: SD Card
 
-\* Compatible models: 3A+, 3B, 3B+, 4, 400, 5B, CM3, CM3+, CM4, CM5, Zero 2W
+- **NanoPi R3S**
+  - Image: [evcc\_[version]\_nanopi-r3s.img.zip](https://github.com/evcc-io/images/releases)
+  - WiFi setup: via USB adapter ([see below](#network-recommendations))
+  - Storage: SD or eMMC ([see instructions](https://docs.armbian.com/User-Guide_Getting-Started/#installation))
 
 ## Available Services
 
