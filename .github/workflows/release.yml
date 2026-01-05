@@ -26,7 +26,7 @@ on:
 
 jobs:
   prepare:
-    runs-on: depot-ubuntu-24.04-arm-4
+    runs-on: depot-ubuntu-24.04-arm
     outputs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
       release_name: ${{ steps.release-name.outputs.name }}
@@ -98,7 +98,7 @@ jobs:
 
   build:
     needs: prepare
-    runs-on: depot-ubuntu-24.04-arm-16
+    runs-on: depot-ubuntu-24.04-arm-32
     timeout-minutes: 360
     strategy:
       fail-fast: false
