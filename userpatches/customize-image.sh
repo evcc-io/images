@@ -271,6 +271,20 @@ EVCCCONF
 systemctl enable evcc || true
 
 # ============================================================================
+# GPIO PERMISSIONS
+# ============================================================================
+echo "[customize-image] setting up GPIO permissions"
+
+# Create gpio group and add evcc user
+groupadd -f gpio
+usermod -aG gpio evcc
+
+# Create udev rule for GPIO access
+cat >/etc/udev/rules.d/99-gpio-permissions.rules <<'GPIORULE'
+SUBSYSTEM=="gpio*", ACTION=="add", PROGRAM="/bin/sh -c 'chgrp -R gpio /sys/${DEVPATH} && chmod -R g+w /sys/${DEVPATH}'"
+GPIORULE
+
+# ============================================================================
 # COCKPIT SETUP
 # ============================================================================
 echo "[customize-image] setting up cockpit"
