@@ -110,6 +110,22 @@ sudo apt install --reinstall evcc
 
 For more details, see the [Linux installation documentation](https://docs.evcc.io/docs/installation/linux).
 
+### Installing to Internal eMMC
+
+For boards with internal eMMC storage (like NanoPi R3S), you can migrate your system from SD card to eMMC for better performance and reliability.
+
+1. Flash and boot from SD card ([see Getting Started](#getting-started))
+2. Login to [Cockpit](#cockpit-ui) and click on **Terminal** in the left navigation
+3. Run the command `armbian-install`
+4. Enter your password when prompted
+5. Select **"Boot from eMMC"** and follow the steps
+6. Select **ext4** file system when asked
+7. The system will copy everything from SD card to internal eMMC
+8. After completion, power off the device, eject the SD card, and reboot
+9. The system will now boot from eMMC
+
+For more details, see the [Armbian Getting Started Guide](https://docs.armbian.com/User-Guide_Getting-Started/#installation).
+
 ## Hardware Recommendations
 
 ### Storage
