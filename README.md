@@ -26,11 +26,11 @@ Repository for ready-to-use [evcc](https://evcc.io) linux images for popular sin
 ## Getting Started
 
 1. Download your image file from [releases](https://github.com/evcc-io/images/releases).
-2. Flash your image to an SD card using [balenaEtcher](https://www.balena.io/etcher/) or [USBImager](https://gitlab.com/bztsrc/usbimager).
+2. Flash your image to an SD card using [Raspberry Pi Imager](https://www.raspberrypi.com/software/) or [balenaEtcher](https://www.balena.io/etcher/).
 3. Insert your SD card and connect your device with power and ethernet.
 4. Navigate to [`https://evcc.local/`](https://evcc.local/) in your browser. Accept the self-signed certificate.
 5. You should see the evcc web interface.
-6. Alternatively: Use the [evcc iOS/Android app](http://github.com/evcc-io/app) to connect to your evcc instance.
+6. Alternatively: Use the [evcc iOS/Android app](https://docs.evcc.io/docs/features/app) to connect to your evcc instance.
 
 For more detailed instructions, see the [full documentation](https://docs.evcc.io/docs/installation/linux-image).
 
