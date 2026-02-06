@@ -11,6 +11,8 @@ REPO_ROOT=$(cd -- "${SCRIPT_DIR}/.." && pwd)
 BOARD=""
 HOSTNAME="evcc"
 RELEASE_NAME="local"
+OPENWB="false"
+OPENWB_DISPLAY="false"
 
 usage() {
   cat <<EOF
@@ -20,9 +22,13 @@ Examples:
   $0 --board rpi
   $0 --board nanopi-r3s --release-name 2025-01
 
-Supported boards: rpi, nanopi-r3s
+Supported boards are (e.g. ${BOARDLIST[@]}).
 EOF
 }
+
+source ${SCRIPT_DIR}/helper-functions.sh
+
+get_available_boards
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
@@ -39,12 +45,6 @@ if [[ -z "$BOARD" ]]; then
   exit 2
 fi
 
-# Map user-facing board names to Armbian internal board names
-case "$BOARD" in
-  rpi) ARMBIAN_BOARD="rpi4b" ;;
-  *) ARMBIAN_BOARD="$BOARD" ;;
-esac
-
 mkdir -p "$REPO_ROOT/dist" "$REPO_ROOT/logs"
 
 # Prepare a temporary userpatches with variables passed to customize-image.sh
@@ -58,19 +58,28 @@ cleanup() {
   fi
 }
 trap cleanup EXIT
-mkdir -p "$BUILDTMP/userpatches/overlay/etc"
+mkdir -p "$BUILDTMP/userpatches/overlay/"
 
+if [[ "$BOARD" =~ ^openwb.* ]]; then
+  OPENWB="true"
+fi
 
-# Exported to the chroot via /etc/evcc-image.env
-cat >"$BUILDTMP/userpatches/overlay/etc/evcc-image.env" <<ENV
+if [[ "$BOARD" == "openwb-display" ]]; then
+  OPENWB_DISPLAY="true"
+fi
+
+# Exported to the chroot via /tmp/overlay/evcc-image.env
+cat >"$BUILDTMP/userpatches/overlay/evcc-image.env" <<ENV
 EVCC_HOSTNAME=${HOSTNAME}
+OPENWB=${OPENWB}
+OPENWB_DISPLAY=${OPENWB_DISPLAY}
 ENV
 
 # Copy our customize script and auxiliary files
 cp -a "$REPO_ROOT/userpatches/." "$BUILDTMP/userpatches/"
 chmod +x "$BUILDTMP/userpatches/customize-image.sh" || true
 
-IMAGE_OUT_DIR="$REPO_ROOT/dist/${ARMBIAN_BOARD}"
+IMAGE_OUT_DIR="$REPO_ROOT/dist/${BOARD}"
 mkdir -p "$IMAGE_OUT_DIR"
 
 # Clone Armbian build framework and run it in Docker mode (it will build its own container image).
@@ -86,25 +95,10 @@ git clone --depth=1 --branch v25.11 https://github.com/armbian/build.git "$BUILD
 rm -rf "$BUILD_DIR/userpatches"
 cp -a "$BUILDTMP/userpatches" "$BUILD_DIR/userpatches"
 
-echo "Starting build for board=${ARMBIAN_BOARD} (${BOARD}) release=bookworm release_name=${RELEASE_NAME} using Armbian build"
+echo "Starting build for board=${BOARD} release=trixie release_name=${RELEASE_NAME} using Armbian build"
 
 pushd "$BUILD_DIR" >/dev/null
-  EXPERT=yes \
-  SKIP_LOG_ARCHIVE=yes \
-  SHARE_LOG=yes \
-  USE_TORRENT=no \
-  OFFLINE_WORK=no \
-  VENDOR="evcc" \
-  VENDORURL="https://evcc.io" \
-  IMAGE_SUFFIX="evcc-${RELEASE_NAME}" \
-  ./compile.sh \
-    BOARD="$ARMBIAN_BOARD" \
-    BRANCH=current \
-    RELEASE="bookworm" \
-    BUILD_MINIMAL=no \
-    BUILD_DESKTOP=no \
-    KERNEL_CONFIGURE=no \
-    COMPRESS_OUTPUTIMAGE=sha,zip
+  ./compile.sh $BOARD 
 popd >/dev/null
 
 # Copy results to output directory
@@ -116,7 +110,7 @@ fi
 
 # Rename outputs to evcc_[release-name]_[board].img[...]
 shopt -s nullglob
-for f in "$IMAGE_OUT_DIR"/Armbian-*; do
+for f in "$IMAGE_OUT_DIR"/evcc_*; do
   base_ext="${f##*.}"
   if [[ "$f" == *.img ]]; then
     mv -f "$f" "$IMAGE_OUT_DIR/evcc_${RELEASE_NAME}_${BOARD}.img"

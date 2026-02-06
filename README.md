@@ -40,6 +40,11 @@ For more detailed instructions, see the [full documentation](https://docs.evcc.i
   - Image: [evcc\_[version]\_rpi.img.zip](https://github.com/evcc-io/images/releases)
   - WiFi setup: supported
   - Storage: SD Card
+- **OpenWB series2 standard/Duo and Standard+/Duo+
+  - Image: [evcc\_[version]\_openwb.img.zip](https://github.com/evcc-io/images/releases)
+  - Image: [evcc\_[version]\_openwb-display.img.zip](https://github.com/evcc-io/images/releases)
+  - WiFi setup: supported
+  - Storage: SD Card
 
 - **NanoPi R3S**
   - Image: [evcc\_[version]\_nanopi-r3s.img.zip](https://github.com/evcc-io/images/releases)

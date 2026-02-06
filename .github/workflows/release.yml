@@ -18,6 +18,8 @@ on:
           - all
           - rpi
           - nanopi-r3s
+          - openwb
+          - openwb-display
       draft:
         description: "Create as draft release for testing"
         required: false
@@ -40,17 +42,32 @@ jobs:
       - name: Compute matrix
         id: set-matrix
         run: |
+          BOARDLIST=()
+          ALLMATRIX='['
+          FILES="userpatches/config-*.conf.sh"
+          for f in $FILES
+          do
+            if [[ "$f" =~ userpatches/config-([A-Za-z0-9\-]+)\.conf\.sh ]]; then
+              BOARDLIST+=(${BASH_REMATCH[1]})
+              ALLMATRIX+='"'${BASH_REMATCH[1]}'",'
+            fi
+          done
+          ALLMATRIX=${ALLMATRIX%,}']'
           # For scheduled runs, build all boards
           if [[ "${{ github.event_name }}" == "schedule" ]]; then
-            MATRIX='["rpi","nanopi-r3s"]'
+            MATRIX=${ALLMATRIX}
           else
             choice='${{ inputs.board }}'
-            case "$choice" in
-              all)      MATRIX='["rpi","nanopi-r3s"]' ;;
-              rpi) MATRIX='["rpi"]' ;;
-              nanopi-r3s) MATRIX='["nanopi-r3s"]' ;;
-              *) echo "Unknown board: $choice" >&2; exit 1 ;;
-            esac
+            if [[ "${choice}" == "all" ]]; then
+              MATRIX=${ALLMATRIX}
+            else
+              value="\<${choice}\>" 
+              if [[ ${BOARDLIST[@]} =~ $value ]]; then
+                MATRIX="[\"${choice}\"]"
+              else
+                echo "Unknown board: $choice" >&2; exit 1
+              fi
+            fi
           fi
           echo "matrix=$MATRIX" >> $GITHUB_OUTPUT
 
@@ -82,7 +99,7 @@ jobs:
 
       - name: Generate release notes
         run: |
-          echo "Latest evcc stable version on Armbian bookworm." > release_notes.md
+          echo "Latest evcc stable version on Armbian trixie." > release_notes.md
 
       - name: Create Release
         id: create-release
