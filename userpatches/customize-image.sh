@@ -293,7 +293,6 @@ echo "[customize-image] enable i2c (if applicable, RPi only)"
 if [[ -f /boot/firmware/config.txt ]]; then
   if grep -q "^#dtparam=i2c_arm=on" /boot/firmware/config.txt; then
     sed -i 's/^#dtparam=i2c_arm=on/dtparam=i2c_arm=on/' /boot/firmware/config.txt
-    echo "[customize-image] I2C enabled."
   fi
 
   # Add evcc user to i2c group for device access
