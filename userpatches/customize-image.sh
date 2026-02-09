@@ -285,6 +285,23 @@ SUBSYSTEM=="gpio*", ACTION=="add", PROGRAM="/bin/sh -c 'chgrp -R gpio /sys/${DEV
 GPIORULE
 
 # ============================================================================
+# RASPBERRY PI: ENABLE I2C ON GPIO HEADER
+# ============================================================================
+echo "[customize-image] enable i2c (if applicable, RPi only)"
+
+# Uncomment dtparam=i2c_arm=on in config.txt
+if [[ -f /boot/firmware/config.txt ]]; then
+  if grep -q "^#dtparam=i2c_arm=on" /boot/firmware/config.txt; then
+    sed -i 's/^#dtparam=i2c_arm=on/dtparam=i2c_arm=on/' /boot/firmware/config.txt
+    echo "[customize-image] I2C enabled."
+  fi
+  
+  # Add evcc user to i2c group for device access
+  groupadd -f i2c
+  usermod -aG i2c evcc
+fi
+
+# ============================================================================
 # COCKPIT SETUP
 # ============================================================================
 echo "[customize-image] setting up cockpit"
