@@ -301,6 +301,11 @@ if [[ -f /boot/firmware/config.txt ]]; then
   usermod -aG i2c evcc
 fi
 
+# Create udev rule for i2c access
+cat >/etc/udev/rules.d/99-i2c-permissions.rules <<'I2CRULE'
+SUBSYSTEM=="i2c-dev", KERNEL=="i2c*", GROUP="i2c", MODE="0660"
+I2CRULE
+
 # ============================================================================
 # COCKPIT SETUP
 # ============================================================================
