@@ -295,7 +295,7 @@ if [[ -f /boot/firmware/config.txt ]]; then
     sed -i 's/^#dtparam=i2c_arm=on/dtparam=i2c_arm=on/' /boot/firmware/config.txt
     echo "[customize-image] I2C enabled."
   fi
-  
+
   # Add evcc user to i2c group for device access
   groupadd -f i2c
   usermod -aG i2c evcc
