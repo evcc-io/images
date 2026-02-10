@@ -287,7 +287,7 @@ GPIORULE
 # ============================================================================
 # ENABLE I2C AND SET UP PERMISSIONS
 # ============================================================================
-echo "[customize-image] enabling i2c and setting up permissions"
+echo "[customize-image] enable i2c and setup permissions"
 
 # Uncomment dtparam=i2c_arm=on in config.txt (RPi only)
 if [[ -f /boot/firmware/config.txt ]]; then
