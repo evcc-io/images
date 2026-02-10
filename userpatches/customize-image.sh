@@ -285,6 +285,25 @@ SUBSYSTEM=="gpio*", ACTION=="add", PROGRAM="/bin/sh -c 'chgrp -R gpio /sys/${DEV
 GPIORULE
 
 # ============================================================================
+# ENABLE I2C AND SET UP PERMISSIONS
+# ============================================================================
+echo "[customize-image] enable i2c and setup permissions"
+
+# Uncomment dtparam=i2c_arm=on in config.txt (RPi only)
+if [[ -f /boot/firmware/config.txt ]]; then
+  sed -i 's/^[[:space:]]*#[[:space:]]*dtparam=i2c_arm=on/dtparam=i2c_arm=on/' /boot/firmware/config.txt
+fi
+
+# Add evcc user to i2c group for device access
+groupadd -f i2c
+usermod -aG i2c evcc
+
+# Create udev rule for i2c access
+cat >/etc/udev/rules.d/99-i2c-permissions.rules <<'I2CRULE'
+SUBSYSTEM=="i2c-dev", KERNEL=="i2c*", GROUP="i2c", MODE="0660"
+I2CRULE
+
+# ============================================================================
 # COCKPIT SETUP
 # ============================================================================
 echo "[customize-image] setting up cockpit"
