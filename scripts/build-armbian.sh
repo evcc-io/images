@@ -20,7 +20,7 @@ Examples:
   $0 --board rpi
   $0 --board nanopi-r3s --release-name 2025-01
 
-Supported boards: rpi, nanopi-r3s
+Supported boards: rpi, nanopi-r3s, nanopi-zero2
 EOF
 }
 
@@ -43,6 +43,12 @@ fi
 case "$BOARD" in
   rpi) ARMBIAN_BOARD="rpi4b" ;;
   *) ARMBIAN_BOARD="$BOARD" ;;
+esac
+
+# Map boards to kernel branch (vendor kernel for SoCs without mainline support)
+case "$BOARD" in
+  nanopi-zero2) KERNEL_BRANCH="vendor" ;;
+  *) KERNEL_BRANCH="current" ;;
 esac
 
 mkdir -p "$REPO_ROOT/dist" "$REPO_ROOT/logs"
@@ -80,7 +86,7 @@ if [[ "$(uname)" == "Darwin" ]]; then
 else
   BUILD_DIR="$BUILDTMP/build"
 fi
-git clone --depth=1 --branch v25.11 https://github.com/armbian/build.git "$BUILD_DIR"
+git clone --depth=1 --branch v26.2.1 https://github.com/armbian/build.git "$BUILD_DIR"
 
 # Place our userpatches into the build tree
 rm -rf "$BUILD_DIR/userpatches"
@@ -99,7 +105,7 @@ pushd "$BUILD_DIR" >/dev/null
   IMAGE_SUFFIX="evcc-${RELEASE_NAME}" \
   ./compile.sh \
     BOARD="$ARMBIAN_BOARD" \
-    BRANCH=current \
+    BRANCH="$KERNEL_BRANCH" \
     RELEASE="bookworm" \
     BUILD_MINIMAL=no \
     BUILD_DESKTOP=no \
