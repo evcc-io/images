@@ -92,6 +92,9 @@ git clone --depth=1 --branch v26.2.1 https://github.com/armbian/build.git "$BUIL
 rm -rf "$BUILD_DIR/userpatches"
 cp -a "$BUILDTMP/userpatches" "$BUILD_DIR/userpatches"
 
+# Remove rockchip64 media/video decoding patches that fail on nanopi-r3s and aren't needed for IoT use case
+find "$BUILD_DIR/patch" \( -name "*verisilicon*" -o -name "*rkvdec*" \) -type f -exec rm -v {} \; 2>/dev/null || true
+
 echo "Starting build for board=${ARMBIAN_BOARD} (${BOARD}) release=bookworm release_name=${RELEASE_NAME} using Armbian build"
 
 pushd "$BUILD_DIR" >/dev/null
