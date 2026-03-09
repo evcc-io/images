@@ -426,6 +426,9 @@ echo "[customize-image] cleaning up"
 systemctl mask console-setup.service || true
 systemctl mask keyboard-setup.service || true
 
+# Clean caddy runtime state so it generates fresh PKI certificates on first boot
+rm -rf /var/lib/caddy/.local /var/lib/caddy/.config /var/lib/caddy/.step
+
 # Clean apt caches to keep image small and silence Armbian warnings about non-empty apt dirs
 apt-get -y autoremove --purge || true
 apt-get clean || true

@@ -18,6 +18,7 @@ on:
           - all
           - rpi
           - nanopi-r3s
+          - nanopi-zero2
       draft:
         description: "Create as draft release for testing"
         required: false
@@ -42,13 +43,14 @@ jobs:
         run: |
           # For scheduled runs, build all boards
           if [[ "${{ github.event_name }}" == "schedule" ]]; then
-            MATRIX='["rpi","nanopi-r3s"]'
+            MATRIX='["rpi","nanopi-r3s","nanopi-zero2"]'
           else
             choice='${{ inputs.board }}'
             case "$choice" in
-              all)      MATRIX='["rpi","nanopi-r3s"]' ;;
+              all)      MATRIX='["rpi","nanopi-r3s","nanopi-zero2"]' ;;
               rpi) MATRIX='["rpi"]' ;;
               nanopi-r3s) MATRIX='["nanopi-r3s"]' ;;
+              nanopi-zero2) MATRIX='["nanopi-zero2"]' ;;
               *) echo "Unknown board: $choice" >&2; exit 1 ;;
             esac
           fi
