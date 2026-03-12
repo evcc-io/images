@@ -51,6 +51,11 @@ For more detailed instructions, see the [full documentation](https://docs.evcc.i
   - WiFi setup: not supported (yet)
   - Storage: SD or eMMC ([see instructions](https://docs.armbian.com/User-Guide_Getting-Started/#installation))
 
+- **NanoPi R76S**
+  - Image: [evcc\_[version]\_nanopi-r76s.img.zip](https://github.com/evcc-io/images/releases)
+  - WiFi setup: not supported (yet)
+  - Storage: SD or eMMC ([see instructions](https://docs.armbian.com/User-Guide_Getting-Started/#installation))
+
 ## Available Services
 
 | Service    | Port | Protocol | URL                                 |
@@ -172,15 +177,15 @@ For ethernet-only boards like the NanoPi, you can use WiFi USB dongles. The foll
 
 CPU performance is not critical for evcc operation as it's not CPU-intensive. These benchmarks are provided for reference and future-proofing considerations.
 
-![CPU Performance Chart](<https://quickchart.io/chart?w=800&h=230&c={type:'horizontalBar',data:{labels:['Raspberry%20Pi%203%20B%2B','Raspberry%20Pi%20Zero%202%20W','NanoPi%20Zero2','NanoPi%20R3S','Raspberry%20Pi%204','Raspberry%20Pi%205'],datasets:[{label:'CPU%20Single',data:[21.78,196.27,350.75,370.98,583.00,1041.75],backgroundColor:'rgba(54,162,235,0.8)',borderWidth:0},{label:'CPU%20Multi',data:[83.41,783.68,1356.49,1466.78,2330.16,4165.05],backgroundColor:'rgba(255,99,132,0.8)',borderWidth:0}]},options:{responsive:false,maintainAspectRatio:false,plugins:{title:{display:false},legend:{display:true,position:'bottom',labels:{boxWidth:12,padding:8,font:{size:10}}}},scales:{x:{beginAtZero:true,grid:{display:false},ticks:{display:false}},y:{grid:{display:false},ticks:{font:{size:10}}}}}}>)
+![CPU Performance Chart](<https://quickchart.io/chart?w=800&h=260&c={type:'horizontalBar',data:{labels:['Raspberry%20Pi%203%20B%2B','Raspberry%20Pi%20Zero%202%20W','NanoPi%20Zero2','NanoPi%20R3S','Raspberry%20Pi%204','NanoPi%20R76S','Raspberry%20Pi%205'],datasets:[{label:'CPU%20Single',data:[21.78,196.27,350.75,370.98,583.00,861.41,1041.75],backgroundColor:'rgba(54,162,235,0.8)',borderWidth:0},{label:'CPU%20Multi',data:[83.41,783.68,1356.49,1466.78,2330.16,3427.36,4165.05],backgroundColor:'rgba(255,99,132,0.8)',borderWidth:0}]},options:{responsive:false,maintainAspectRatio:false,plugins:{title:{display:false},legend:{display:true,position:'bottom',labels:{boxWidth:12,padding:8,font:{size:10}}}},scales:{x:{beginAtZero:true,grid:{display:false},ticks:{display:false}},y:{grid:{display:false},ticks:{font:{size:10}}}}}}>)
 
 Benchmark methodology: Results obtained using sysbench with the following commands:
 
 ```bash
 # CPU Single
-sysbench --test=cpu --cpu-max-prime=20000 --num-threads=1 --max-time=200 run
+sysbench cpu --cpu-max-prime=20000 --threads=1 --time=200 run
 # CPU Multi
-sysbench --test=cpu --cpu-max-prime=20000 --num-threads=4 --max-time=200 run
+sysbench cpu --cpu-max-prime=20000 --threads=4 --time=200 run
 ```
 
 ## Building Images Locally
