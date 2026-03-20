@@ -113,7 +113,7 @@ pushd "$BUILD_DIR" >/dev/null
     BUILD_MINIMAL=no \
     BUILD_DESKTOP=no \
     KERNEL_CONFIGURE=no \
-    COMPRESS_OUTPUTIMAGE=sha,zip
+    COMPRESS_OUTPUTIMAGE=sha
 popd >/dev/null
 
 # Copy results to output directory
@@ -133,8 +133,6 @@ for f in "$IMAGE_OUT_DIR"/Armbian-*; do
     mv -f "$f" "$IMAGE_OUT_DIR/evcc_${RELEASE_NAME}_${BOARD}.img.sha"
   elif [[ "$f" == *.img.txt ]]; then
     mv -f "$f" "$IMAGE_OUT_DIR/evcc_${RELEASE_NAME}_${BOARD}.img.txt"
-  elif [[ "$f" == *.img.zip ]]; then
-    mv -f "$f" "$IMAGE_OUT_DIR/evcc_${RELEASE_NAME}_${BOARD}.img.zip"
   fi
 done
 shopt -u nullglob

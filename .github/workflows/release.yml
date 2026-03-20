@@ -127,6 +127,16 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y qemu-user-static binfmt-support xz-utils zip
 
+      - name: Ensure loop devices
+        run: |
+          sudo modprobe loop
+          sudo losetup -D
+          # Create loop device nodes if missing
+          for i in $(seq 0 15); do
+            [ -e /dev/loop$i ] || sudo mknod /dev/loop$i b 7 $i
+          done
+          ls -la /dev/loop*
+
       - name: Build image
         run: |
           set -euo pipefail
