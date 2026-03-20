@@ -34,6 +34,7 @@ jobs:
       release_tag: ${{ steps.release-name.outputs.tag }}
       release_id: ${{ steps.create-release.outputs.id }}
       release_upload_url: ${{ steps.create-release.outputs.upload_url }}
+      is_draft: ${{ steps.set-draft.outputs.is_draft }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -82,6 +83,15 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Determine draft mode
+        id: set-draft
+        run: |
+          if [[ "${{ github.event_name }}" == "schedule" ]]; then
+            echo "is_draft=false" >> $GITHUB_OUTPUT
+          else
+            echo "is_draft=${{ inputs.draft }}" >> $GITHUB_OUTPUT
+          fi
+
       - name: Generate release notes
         run: |
           echo "Latest evcc stable version on Armbian bookworm." > release_notes.md
@@ -95,7 +105,7 @@ jobs:
           tag_name: ${{ steps.release-name.outputs.tag }}
           release_name: evcc Images ${{ steps.release-name.outputs.name }}
           body_path: release_notes.md
-          draft: ${{ github.event_name == 'schedule' && 'false' || inputs.draft }}
+          draft: true
           prerelease: false
 
   build:
@@ -172,3 +182,27 @@ jobs:
           asset_path: ${{ steps.find-files.outputs.txt_file }}
           asset_name: evcc_${{ needs.prepare.outputs.release_name }}_${{ matrix.board }}.img.txt
           asset_content_type: text/plain
+
+  finalize:
+    needs: [prepare, build]
+    runs-on: depot-ubuntu-24.04-arm
+    if: success() && needs.prepare.outputs.is_draft != 'true'
+    steps:
+      - name: Publish release
+        run: |
+          gh release edit "$TAG" --repo "$GITHUB_REPOSITORY" --draft=false
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ needs.prepare.outputs.release_tag }}
+
+  cleanup:
+    needs: [prepare, build]
+    runs-on: depot-ubuntu-24.04-arm
+    if: failure() && needs.prepare.outputs.is_draft != 'true'
+    steps:
+      - name: Delete failed release
+        run: |
+          gh release delete "$TAG" --repo "$GITHUB_REPOSITORY" --yes --cleanup-tag
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ needs.prepare.outputs.release_tag }}
