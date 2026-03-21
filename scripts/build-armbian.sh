@@ -20,7 +20,7 @@ Examples:
   $0 --board rpi
   $0 --board nanopi-r3s --release-name 2025-01
 
-Supported boards: rpi, nanopi-r3s, nanopi-zero2
+Supported boards: rpi, nanopi-r3s, nanopi-zero2, nanopi-r76s
 EOF
 }
 
@@ -47,7 +47,7 @@ esac
 
 # Map boards to kernel branch (vendor kernel for SoCs without mainline support)
 case "$BOARD" in
-  nanopi-zero2) KERNEL_BRANCH="vendor" ;;
+  nanopi-zero2|nanopi-r76s) KERNEL_BRANCH="vendor" ;;
   *) KERNEL_BRANCH="current" ;;
 esac
 
