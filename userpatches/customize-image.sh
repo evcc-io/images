@@ -177,6 +177,9 @@ fi
 if [[ "$INTERNET_AVAILABLE" == "false" ]]; then
     # Check if WiFi hardware exists
     if ls /sys/class/net/wl* >/dev/null 2>&1 || iwconfig 2>/dev/null | grep -q "IEEE 802.11"; then
+        # Set WiFi regulatory domain (required for AP mode on rtw88 and similar drivers)
+        iw reg set DE 2>/dev/null || true
+        sleep 1
         # Unmask comitup first in case it was masked from previous boot
         systemctl unmask comitup.service >/dev/null 2>&1 || true
         systemctl enable comitup.service >/dev/null 2>&1 || true
