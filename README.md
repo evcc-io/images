@@ -190,7 +190,11 @@ sysbench cpu --cpu-max-prime=20000 --threads=4 --time=200 run
 
 ## Building Images Locally
 
-You'll need Docker Desktop installed and running.
+### Requirements
+
+- **macOS:** [Docker Desktop](https://www.docker.com/products/docker-desktop/) installed and running
+- **Linux (x86_64):** Docker Engine with QEMU binfmt support for cross-architecture builds. See the [Armbian Build Preparation Guide](https://docs.armbian.com/Developer-Guide_Build-Preparation/) for details.
+- ~50GB free disk space and 8GB RAM
 
 ```bash
 # Clone and enter the repository
