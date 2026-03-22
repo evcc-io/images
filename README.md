@@ -58,20 +58,15 @@ For more detailed instructions, see the [full documentation](https://docs.evcc.i
 
 ## Available Services
 
-| Service    | Port | Protocol | URL                                 |
-| ---------- | ---- | -------- | ----------------------------------- |
-| evcc UI    | 443  | HTTPS    | `https://evcc.local/`               |
-| OCPP       | 8887 | WSS      | `wss://evcc.local:8887/<stationid>` |
-| Cockpit UI | 9090 | HTTPS    | `https://evcc.local:9090/`          |
+| Service    | Port | Protocol | URL                                 | Note                           |
+| ---------- | ---- | -------- | ----------------------------------- | ------------------------------ |
+| evcc UI    | 443  | HTTPS    | `https://evcc.local/`               | self-signed cert **(default)** |
+|            | 7070 | HTTP     | `http://evcc.local:7070/`           | unencrypted                    |
+| OCPP       | 8888 | WSS      | `wss://evcc.local:8888/<stationid>` | self-signed cert               |
+|            | 8887 | WS       | `ws://evcc.local:8887/<stationid>`  | unencrypted **(default)**      |
+| Cockpit UI | 9090 | HTTPS    | `https://evcc.local:9090/`          | self-signed cert               |
 
-**Note:** The above services use self-signed certificates.
-You'll need to accept the certificate warning in your browser, or disable certificate verification in your EV charger's OCPP configuration.
-If you have compatibility problems, use the unencrypted alternatives below:
-
-| Service | Port | Protocol | URL                                |
-| ------- | ---- | -------- | ---------------------------------- |
-| evcc UI | 7070 | HTTP     | `http://evcc.local:7070/`          |
-| OCPP    | 8886 | WS       | `ws://evcc.local:8886/<stationid>` |
+The image offers an encrypted version for all services. We recommend using encrypted connections even in local networks. For OCPP, some EV chargers don't support self-signed certificates. Use unencrypted WS as a fallback.
 
 ## Administration
 

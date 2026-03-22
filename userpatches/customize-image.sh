@@ -266,8 +266,6 @@ mkdir -p /etc/systemd/system/evcc.service.d
 cat >/etc/systemd/system/evcc.service.d/override.conf <<EVCCCONF
 [Service]
 Environment="EVCC_NETWORK_HOST=${EVCC_HOSTNAME}.local"
-Environment="EVCC_NETWORK_EXTERNALURL=https://${EVCC_HOSTNAME}.local"
-Environment="EVCC_OCPP_PORT=8886"
 EVCCCONF
 
 # Enable evcc service
@@ -386,13 +384,13 @@ https:// {
   reverse_proxy 127.0.0.1:7070
 }
 
-# OCPP port forwarding: 8886 (HTTP) -> 8887 (HTTPS)
-:8887 {
+# OCPP secure alternative: 8887 (WS) -> 8888 (WSS)
+:8888 {
   tls internal {
     protocols tls1.2 tls1.3
   }
   log
-  reverse_proxy 127.0.0.1:8886
+  reverse_proxy 127.0.0.1:8887
 }
 
 CADDY
