@@ -86,14 +86,11 @@ if [[ "$(uname)" == "Darwin" ]]; then
 else
   BUILD_DIR="$BUILDTMP/build"
 fi
-git clone --depth=1 --branch v26.2.1 https://github.com/armbian/build.git "$BUILD_DIR"
+git clone --depth=1 --branch v26.5.1 https://github.com/armbian/build.git "$BUILD_DIR"
 
 # Place our userpatches into the build tree
 rm -rf "$BUILD_DIR/userpatches"
 cp -a "$BUILDTMP/userpatches" "$BUILD_DIR/userpatches"
-
-# Remove patches that fail/aren't needed on nanopi-r3s: verisilicon+rkvdec (media), naneng (rk3399 usbc-phy)
-find "$BUILD_DIR/patch" \( -name "*verisilicon*" -o -name "*rkvdec*" -o -name "*naneng-Add-fallback-for-old-DTs*" \) -type f -exec rm -v {} \; 2>/dev/null || true
 
 echo "Starting build for board=${ARMBIAN_BOARD} (${BOARD}) release=bookworm release_name=${RELEASE_NAME} using Armbian build"
 
