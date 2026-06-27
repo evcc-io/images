@@ -56,7 +56,7 @@ dpkg-reconfigure -f noninteractive tzdata >/dev/null 2>&1 || true
 echo "$EVCC_HOSTNAME" > /etc/hostname
 sed -i "s/127.0.1.1\s\+.*/127.0.1.1\t$EVCC_HOSTNAME/" /etc/hosts || true
 
-# SSH hardening (Armbian/Debian Bookworm): use drop-in to override defaults
+# SSH hardening (Armbian/Debian): use drop-in to override defaults
 mkdir -p /etc/ssh/sshd_config.d
 cat >/etc/ssh/sshd_config.d/99-evcc.conf <<'SSHD'
 # Disable SSH login for root
@@ -108,13 +108,8 @@ chown -R root:root /root
 # ============================================================================
 echo "[customize-image] setting up comitup for wifi configuration"
 
-# Install latest comitup from official repository (fixes device type compatibility)
-curl -L -o /tmp/davesteele-comitup-apt-source.deb \
-  "https://davesteele.github.io/comitup/deb/davesteele-comitup-apt-source_1.3_all.deb"
-dpkg -i /tmp/davesteele-comitup-apt-source.deb || apt-get install -f -y
-apt-get update
+# Install comitup from Debian trixie main (1.43+ includes the device-type/primary_wifi_device fix)
 apt-get install -y --no-install-recommends comitup
-rm -f /tmp/davesteele-comitup-apt-source.deb
 
 # Clean up any potential interface conflicts
 rm -f /etc/network/interfaces || true
@@ -309,29 +304,28 @@ I2CRULE
 # ============================================================================
 echo "[customize-image] setting up cockpit"
 
-# Enable Bookworm backports for newer Cockpit version
-echo "deb http://deb.debian.org/debian bookworm-backports main" > /etc/apt/sources.list.d/cockpit-backports.list
-
-# Add 45Drives repository for cockpit-navigator
-curl -sSL https://repo.45drives.com/setup | bash
-
-# Add AllStarLink repository for cockpit-wifimanager
-curl -L -o /tmp/asl-apt-repos.deb12_all.deb \
-  "https://repo.allstarlink.org/public/asl-apt-repos.deb12_all.deb"
-dpkg -i /tmp/asl-apt-repos.deb12_all.deb || apt-get install -f -y
+# Add AllStarLink repository for cockpit-wifimanager (deb13 = trixie)
+curl -L -o /tmp/asl-apt-repos.deb13_all.deb \
+  "https://repo.allstarlink.org/public/asl-apt-repos.deb13_all.deb"
+dpkg -i /tmp/asl-apt-repos.deb13_all.deb || apt-get install -f -y
 apt-get update
-rm -f /tmp/asl-apt-repos.deb12_all.deb
+rm -f /tmp/asl-apt-repos.deb13_all.deb
 
-# Install Cockpit and related packages from backports
+# Install Cockpit and related packages from Debian trixie main (cockpit 337+)
 # Note: cockpit-pcp functionality is now built into cockpit-bridge in version 337+
-apt-get install -y --no-install-recommends -t bookworm-backports \
+apt-get install -y --no-install-recommends \
   cockpit \
   packagekit cockpit-packagekit \
   cockpit-networkmanager
 
-# Install cockpit-navigator and cockpit-wifimanager from their respective repos
+# File manager: cockpit-files is the official successor to 45drives' cockpit-navigator.
+# It lives in trixie-backports (already enabled by Armbian); needs cockpit-bridge >= 318.
+# This replaces the 45Drives repo, whose setup script refuses to run on trixie.
+apt-get install -y --no-install-recommends -t trixie-backports \
+  cockpit-files
+
+# WiFi management UI from AllStarLink repo (general-purpose plugin, no ASL deps)
 apt-get install -y --no-install-recommends \
-  cockpit-navigator \
   cockpit-wifimanager
 
 # Cockpit configuration
@@ -403,7 +397,7 @@ systemctl enable caddy || true
 # ============================================================================
 echo "[customize-image] setting up unattended security updates"
 
-# Install and enable unattended-upgrades (defaults to security-only in Debian 12)
+# Install and enable unattended-upgrades (defaults to security-only in Debian)
 apt-get install -y --no-install-recommends unattended-upgrades
 echo 'APT::Periodic::Unattended-Upgrade "1";' > /etc/apt/apt.conf.d/20auto-upgrades
 
