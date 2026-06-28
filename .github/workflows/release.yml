@@ -96,7 +96,7 @@ jobs:
 
       - name: Generate release notes
         run: |
-          echo "Latest evcc stable version on Armbian bookworm." > release_notes.md
+          echo "Latest evcc stable version on Armbian trixie." > release_notes.md
 
       - name: Create Release
         id: create-release

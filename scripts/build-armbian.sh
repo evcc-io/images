@@ -92,7 +92,7 @@ git clone --depth=1 --branch v26.5.1 https://github.com/armbian/build.git "$BUIL
 rm -rf "$BUILD_DIR/userpatches"
 cp -a "$BUILDTMP/userpatches" "$BUILD_DIR/userpatches"
 
-echo "Starting build for board=${ARMBIAN_BOARD} (${BOARD}) release=bookworm release_name=${RELEASE_NAME} using Armbian build"
+echo "Starting build for board=${ARMBIAN_BOARD} (${BOARD}) release=trixie release_name=${RELEASE_NAME} using Armbian build"
 
 pushd "$BUILD_DIR" >/dev/null
   EXPERT=yes \
@@ -106,7 +106,7 @@ pushd "$BUILD_DIR" >/dev/null
   ./compile.sh \
     BOARD="$ARMBIAN_BOARD" \
     BRANCH="$KERNEL_BRANCH" \
-    RELEASE="bookworm" \
+    RELEASE="trixie" \
     BUILD_MINIMAL=no \
     BUILD_DESKTOP=no \
     KERNEL_CONFIGURE=no \
