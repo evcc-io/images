@@ -166,6 +166,8 @@ The device will create a WiFi setup hotspot **if no internet connection is detec
 For ethernet-only boards like the NanoPi, you can use WiFi USB dongles. The following adapters have been tested successfully:
 
 - EDUP EP-B8508GS
+- Anadol Ixuss AWL150 (Ralink RT5370)
+- TP-Link Archer T3U Nano (AC1300, dual-band)
 - _add your's here ..._
 
 ## Hardware Comparison
