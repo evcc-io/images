@@ -48,12 +48,12 @@ For more detailed instructions, see the [full documentation](https://docs.evcc.i
 
 - **NanoPi Zero2**
   - Image: [evcc\_[version]\_nanopi-zero2.img.zip](https://github.com/evcc-io/images/releases)
-  - WiFi setup: not supported (yet)
+  - WiFi setup: via USB adapter ([see below](#network-recommendations))
   - Storage: SD or eMMC ([see instructions](https://docs.armbian.com/User-Guide_Getting-Started/#installation))
 
 - **NanoPi R76S**
   - Image: [evcc\_[version]\_nanopi-r76s.img.zip](https://github.com/evcc-io/images/releases)
-  - WiFi setup: not supported (yet)
+  - WiFi setup: via USB adapter ([see below](#network-recommendations))
   - Storage: SD or eMMC ([see instructions](https://docs.armbian.com/User-Guide_Getting-Started/#installation))
 
 ## Available Services
