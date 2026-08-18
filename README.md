@@ -25,8 +25,8 @@ Repository for ready-to-use [evcc](https://evcc.io) linux images for popular sin
 
 ## Getting Started
 
-1. Download your image file from [releases](https://github.com/evcc-io/images/releases).
-2. Flash your image to an SD card using [Raspberry Pi Imager](https://www.raspberrypi.com/software/) or [balenaEtcher](https://www.balena.io/etcher/).
+1. Download the latest image for [Raspberry Pi](https://github.com/evcc-io/images/releases/latest/download/evcc_raspberry-pi.img.zip) (and [other boards](#supported-boards)).
+2. Flash your image to an SD card using [Raspberry Pi Imager](https://www.raspberrypi.com/software/), [Armbian Imager](https://imager.armbian.com/#downloads) or [balenaEtcher](https://www.balena.io/etcher/).
 3. Insert your SD card and connect your device with power and ethernet.
 4. Navigate to [`https://evcc.local/`](https://evcc.local/) in your browser. Accept the self-signed certificate.
 5. You should see the evcc web interface.
@@ -36,23 +36,25 @@ For more detailed instructions, see the [full documentation](https://docs.evcc.i
 
 ## Supported Boards
 
+The links below always point to the latest release. Older versions and build logs are on the [releases page](https://github.com/evcc-io/images/releases).
+
 - **Raspberry Pi 4, 5, 3B+, Zero 2W**
-  - Image: [evcc\_[version]\_rpi.img.zip](https://github.com/evcc-io/images/releases)
+  - Image: [evcc_raspberry-pi.img.zip](https://github.com/evcc-io/images/releases/latest/download/evcc_raspberry-pi.img.zip) ([checksum](https://github.com/evcc-io/images/releases/latest/download/evcc_raspberry-pi.img.sha))
   - WiFi setup: supported
   - Storage: SD Card
 
-- **NanoPi R3S**
-  - Image: [evcc\_[version]\_nanopi-r3s.img.zip](https://github.com/evcc-io/images/releases)
+- **NanoPi Zero2**
+  - Image: [evcc_nanopi-zero2.img.zip](https://github.com/evcc-io/images/releases/latest/download/evcc_nanopi-zero2.img.zip) ([checksum](https://github.com/evcc-io/images/releases/latest/download/evcc_nanopi-zero2.img.sha))
   - WiFi setup: via USB adapter ([see below](#network-recommendations))
   - Storage: SD or eMMC ([see instructions](https://docs.armbian.com/User-Guide_Getting-Started/#installation))
 
-- **NanoPi Zero2**
-  - Image: [evcc\_[version]\_nanopi-zero2.img.zip](https://github.com/evcc-io/images/releases)
+- **NanoPi R3S**
+  - Image: [evcc_nanopi-r3s.img.zip](https://github.com/evcc-io/images/releases/latest/download/evcc_nanopi-r3s.img.zip) ([checksum](https://github.com/evcc-io/images/releases/latest/download/evcc_nanopi-r3s.img.sha))
   - WiFi setup: via USB adapter ([see below](#network-recommendations))
   - Storage: SD or eMMC ([see instructions](https://docs.armbian.com/User-Guide_Getting-Started/#installation))
 
 - **NanoPi R76S**
-  - Image: [evcc\_[version]\_nanopi-r76s.img.zip](https://github.com/evcc-io/images/releases)
+  - Image: [evcc_nanopi-r76s.img.zip](https://github.com/evcc-io/images/releases/latest/download/evcc_nanopi-r76s.img.zip) ([checksum](https://github.com/evcc-io/images/releases/latest/download/evcc_nanopi-r76s.img.sha))
   - WiFi setup: via USB adapter ([see below](#network-recommendations))
   - Storage: SD or eMMC ([see instructions](https://docs.armbian.com/User-Guide_Getting-Started/#installation))
 
