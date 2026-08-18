@@ -165,6 +165,17 @@ jobs:
           echo "sha_file=$(find dist -name "*.img.sha" -type f)" >> $GITHUB_OUTPUT
           echo "txt_file=$(find dist -name "*.img.txt" -type f)" >> $GITHUB_OUTPUT
 
+      # Version-free, descriptive asset names so that
+      # https://github.com/evcc-io/images/releases/latest/download/<asset> always
+      # resolves to the latest release. The .img inside the zip keeps the version.
+      - name: Compute asset name
+        id: asset-name
+        run: |
+          case "${{ matrix.board }}" in
+            rpi) echo "board=raspberry-pi" >> $GITHUB_OUTPUT ;;
+            *) echo "board=${{ matrix.board }}" >> $GITHUB_OUTPUT ;;
+          esac
+
       - name: Upload compressed image to release
         uses: actions/upload-release-asset@v1
         env:
@@ -172,7 +183,7 @@ jobs:
         with:
           upload_url: ${{ needs.prepare.outputs.release_upload_url }}
           asset_path: ${{ steps.find-files.outputs.img_zip }}
-          asset_name: evcc_${{ needs.prepare.outputs.release_name }}_${{ matrix.board }}.img.zip
+          asset_name: evcc_${{ steps.asset-name.outputs.board }}.img.zip
           asset_content_type: application/zip
 
       - name: Upload SHA file to release
@@ -182,7 +193,7 @@ jobs:
         with:
           upload_url: ${{ needs.prepare.outputs.release_upload_url }}
           asset_path: ${{ steps.find-files.outputs.sha_file }}
-          asset_name: evcc_${{ needs.prepare.outputs.release_name }}_${{ matrix.board }}.img.sha
+          asset_name: evcc_${{ steps.asset-name.outputs.board }}.img.sha
           asset_content_type: text/plain
 
       - name: Upload TXT file to release
@@ -192,7 +203,7 @@ jobs:
         with:
           upload_url: ${{ needs.prepare.outputs.release_upload_url }}
           asset_path: ${{ steps.find-files.outputs.txt_file }}
-          asset_name: evcc_${{ needs.prepare.outputs.release_name }}_${{ matrix.board }}.img.txt
+          asset_name: evcc_${{ steps.asset-name.outputs.board }}.img.txt
           asset_content_type: text/plain
 
   finalize:
