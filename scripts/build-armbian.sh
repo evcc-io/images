@@ -86,7 +86,7 @@ if [[ "$(uname)" == "Darwin" ]]; then
 else
   BUILD_DIR="$BUILDTMP/build"
 fi
-git clone --depth=1 --branch v26.5.1 https://github.com/armbian/build.git "$BUILD_DIR"
+git clone --depth=1 --branch v26.08 https://github.com/armbian/build.git "$BUILD_DIR"
 
 # Place our userpatches into the build tree
 rm -rf "$BUILD_DIR/userpatches"
