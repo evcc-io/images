@@ -19,6 +19,7 @@ on:
           - rpi
           - nanopi-r3s
           - nanopi-zero2
+          - nanopi-neo3-plus
           - nanopi-r76s
       draft:
         description: "Create as draft release for testing"
@@ -53,6 +54,7 @@ jobs:
               rpi) MATRIX='["rpi"]' ;;
               nanopi-r3s) MATRIX='["nanopi-r3s"]' ;;
               nanopi-zero2) MATRIX='["nanopi-zero2"]' ;;
+              nanopi-neo3-plus) MATRIX='["nanopi-neo3-plus"]' ;;
               nanopi-r76s) MATRIX='["nanopi-r76s"]' ;;
               *) echo "Unknown board: $choice" >&2; exit 1 ;;
             esac
