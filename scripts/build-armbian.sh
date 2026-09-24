@@ -20,7 +20,7 @@ Examples:
   $0 --board rpi
   $0 --board nanopi-r3s --release-name 2025-01
 
-Supported boards: rpi, nanopi-r3s, nanopi-zero2, nanopi-r76s
+Supported boards: rpi, nanopi-r3s, nanopi-zero2, nanopi-r76s, nanopi-neo3-plus, nanopi-r28s
 EOF
 }
 
@@ -47,8 +47,14 @@ esac
 
 # Map boards to kernel branch (vendor kernel for SoCs without mainline support)
 case "$BOARD" in
-  nanopi-zero2|nanopi-r76s) KERNEL_BRANCH="vendor" ;;
+  nanopi-zero2|nanopi-r76s|nanopi-r28s) KERNEL_BRANCH="vendor" ;;
   *) KERNEL_BRANCH="current" ;;
+esac
+
+# Armbian build framework version. Newer boards are only on trunk until the next stable tag (v26.11).
+case "$BOARD" in
+  nanopi-neo3-plus|nanopi-r28s) ARMBIAN_REF="v26.11.0-trunk.54" ;;
+  *) ARMBIAN_REF="v26.5.1" ;;
 esac
 
 mkdir -p "$REPO_ROOT/dist" "$REPO_ROOT/logs"
@@ -86,7 +92,7 @@ if [[ "$(uname)" == "Darwin" ]]; then
 else
   BUILD_DIR="$BUILDTMP/build"
 fi
-git clone --depth=1 --branch v26.5.1 https://github.com/armbian/build.git "$BUILD_DIR"
+git clone --depth=1 --branch "$ARMBIAN_REF" https://github.com/armbian/build.git "$BUILD_DIR"
 
 # Place our userpatches into the build tree
 rm -rf "$BUILD_DIR/userpatches"
