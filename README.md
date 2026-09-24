@@ -26,7 +26,7 @@ Repository for ready-to-use [evcc](https://evcc.io) linux images for popular sin
 ## Getting Started
 
 1. Download the latest image for [Raspberry Pi](https://github.com/evcc-io/images/releases/latest/download/evcc_raspberry-pi.img.zip) (and [other boards](#supported-boards)).
-2. Flash your image to an SD card using [Raspberry Pi Imager](https://www.raspberrypi.com/software/), [Armbian Imager](https://imager.armbian.com/#downloads) or [balenaEtcher](https://www.balena.io/etcher/).
+2. Flash your image to an SD card using [Raspberry Pi Imager](https://www.raspberrypi.com/software/), [Armbian Imager](https://imager.armbian.com/#downloads), [balenaEtcher](https://www.balena.io/etcher/) or [Rufus](https://rufus.ie/) (Windows).
 3. Insert your SD card and connect your device with power and ethernet.
 4. Navigate to [`https://evcc.local/`](https://evcc.local/) in your browser. Accept the self-signed certificate.
 5. You should see the evcc web interface.
@@ -38,37 +38,61 @@ For more detailed instructions, see the [full documentation](https://docs.evcc.i
 
 The links below always point to the latest release. Older versions and build logs are on the [releases page](https://github.com/evcc-io/images/releases).
 
-- **Raspberry Pi 4, 5, 3B+, Zero 2W**
-  - Image: [evcc_raspberry-pi.img.zip](https://github.com/evcc-io/images/releases/latest/download/evcc_raspberry-pi.img.zip) ([checksum](https://github.com/evcc-io/images/releases/latest/download/evcc_raspberry-pi.img.sha))
-  - WiFi setup: supported (built-in WiFi)
-  - Storage: SD Card
+| Board                                    | Image                                                                                                                                                                                                          | WiFi setup                              | [eMMC](#installing-to-internal-emmc) | Notes                              |
+| ---------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------- | ------------------------------------ | ---------------------------------- |
+| Raspberry&nbsp;Pi&nbsp;5                 | [raspberry-pi](https://github.com/evcc-io/images/releases/latest/download/evcc_raspberry-pi.img.zip) ([SHA](https://github.com/evcc-io/images/releases/latest/download/evcc_raspberry-pi.img.sha))             | built-in                                | —                                    | fast, but overkill and expensive   |
+| NanoPi&nbsp;R76S                         | [nanopi-r76s](https://github.com/evcc-io/images/releases/latest/download/evcc_nanopi-r76s.img.zip) ([SHA](https://github.com/evcc-io/images/releases/latest/download/evcc_nanopi-r76s.img.sha))                | [USB adapter](#network-recommendations) | 32GB built-in                        | fast, more than evcc needs         |
+| **Raspberry&nbsp;Pi&nbsp;4**&nbsp;🌟     | [raspberry-pi](https://github.com/evcc-io/images/releases/latest/download/evcc_raspberry-pi.img.zip) ([SHA](https://github.com/evcc-io/images/releases/latest/download/evcc_raspberry-pi.img.sha))             | built-in                                | —                                    | popular choice, widely available   |
+| **NanoPi&nbsp;NEO3&nbsp;Plus**&nbsp;🌟🧪 | [nanopi-neo3-plus](https://github.com/evcc-io/images/releases/latest/download/evcc_nanopi-neo3-plus.img.zip) ([SHA](https://github.com/evcc-io/images/releases/latest/download/evcc_nanopi-neo3-plus.img.sha)) | [USB adapter](#network-recommendations) | optional                             | cheap, good performance            |
+| **NanoPi&nbsp;R28S**&nbsp;🌟🧪           | [nanopi-r28s](https://github.com/evcc-io/images/releases/latest/download/evcc_nanopi-r28s.img.zip) ([SHA](https://github.com/evcc-io/images/releases/latest/download/evcc_nanopi-r28s.img.sha))                | built-in                                | optional                             | cheap, built-in WiFi               |
+| **NanoPi&nbsp;R3S**&nbsp;🌟              | [nanopi-r3s](https://github.com/evcc-io/images/releases/latest/download/evcc_nanopi-r3s.img.zip) ([SHA](https://github.com/evcc-io/images/releases/latest/download/evcc_nanopi-r3s.img.sha))                   | [USB adapter](#network-recommendations) | optional                             | cheap, good performance            |
+| **NanoPi&nbsp;Zero2**&nbsp;🌟            | [nanopi-zero2](https://github.com/evcc-io/images/releases/latest/download/evcc_nanopi-zero2.img.zip) ([SHA](https://github.com/evcc-io/images/releases/latest/download/evcc_nanopi-zero2.img.sha))             | [USB adapter](#network-recommendations) | optional                             | cheap, good performance, compact   |
+| Raspberry&nbsp;Pi&nbsp;Zero&nbsp;2W      | [raspberry-pi](https://github.com/evcc-io/images/releases/latest/download/evcc_raspberry-pi.img.zip) ([SHA](https://github.com/evcc-io/images/releases/latest/download/evcc_raspberry-pi.img.sha))             | built-in                                | —                                    | cheap, but WiFi only (no ethernet) |
+| Raspberry&nbsp;Pi&nbsp;3B+               | [raspberry-pi](https://github.com/evcc-io/images/releases/latest/download/evcc_raspberry-pi.img.zip) ([SHA](https://github.com/evcc-io/images/releases/latest/download/evcc_raspberry-pi.img.sha))             | built-in                                | —                                    | slow, fine if you already have one |
 
-- **NanoPi Zero2**
-  - Image: [evcc_nanopi-zero2.img.zip](https://github.com/evcc-io/images/releases/latest/download/evcc_nanopi-zero2.img.zip) ([checksum](https://github.com/evcc-io/images/releases/latest/download/evcc_nanopi-zero2.img.sha))
-  - WiFi setup: via USB adapter ([see below](#network-recommendations))
-  - Storage: SD or eMMC ([see instructions](https://docs.armbian.com/User-Guide_Getting-Started/#installation))
+All boards boot from SD card, the easiest way to get started. eMMC is more durable.
+The NanoPi boards are available with a metal case.
 
-- **NanoPi R3S**
-  - Image: [evcc_nanopi-r3s.img.zip](https://github.com/evcc-io/images/releases/latest/download/evcc_nanopi-r3s.img.zip) ([checksum](https://github.com/evcc-io/images/releases/latest/download/evcc_nanopi-r3s.img.sha))
-  - WiFi setup: via USB adapter ([see below](#network-recommendations))
-  - Storage: SD or eMMC ([see instructions](https://docs.armbian.com/User-Guide_Getting-Started/#installation))
+🌟 Our recommendation for running evcc: fast enough, good value.  
+🧪 Beta: built from Armbian's development branch until the board is part of a stable Armbian release.
 
-- **NanoPi R76S**
-  - Image: [evcc_nanopi-r76s.img.zip](https://github.com/evcc-io/images/releases/latest/download/evcc_nanopi-r76s.img.zip) ([checksum](https://github.com/evcc-io/images/releases/latest/download/evcc_nanopi-r76s.img.sha))
-  - WiFi setup: via USB adapter ([see below](#network-recommendations))
-  - Storage: SD or eMMC ([see instructions](https://docs.armbian.com/User-Guide_Getting-Started/#installation))
+## Hardware Comparison
 
-- **NanoPi NEO3 Plus** (beta)
-  - Image: [evcc_nanopi-neo3-plus.img.zip](https://github.com/evcc-io/images/releases/latest/download/evcc_nanopi-neo3-plus.img.zip) ([checksum](https://github.com/evcc-io/images/releases/latest/download/evcc_nanopi-neo3-plus.img.sha))
-  - WiFi setup: via USB adapter ([see below](#network-recommendations))
-  - Storage: SD or eMMC ([see instructions](https://docs.armbian.com/User-Guide_Getting-Started/#installation))
+CPU performance is not critical for evcc operation as it's not CPU-intensive. These benchmarks are provided for reference and future-proofing considerations.
 
-- **NanoPi R28S** (beta)
-  - Image: [evcc_nanopi-r28s.img.zip](https://github.com/evcc-io/images/releases/latest/download/evcc_nanopi-r28s.img.zip) ([checksum](https://github.com/evcc-io/images/releases/latest/download/evcc_nanopi-r28s.img.sha))
-  - WiFi setup: supported (built-in WiFi)
-  - Storage: SD or eMMC ([see instructions](https://docs.armbian.com/User-Guide_Getting-Started/#installation))
+![CPU Performance Chart](<https://quickchart.io/chart?w=800&h=320&c={type:'horizontalBar',data:{labels:['Raspberry%20Pi%205','NanoPi%20R76S','Raspberry%20Pi%204','NanoPi%20NEO3%20Plus','NanoPi%20R3S','NanoPi%20R28S','NanoPi%20Zero2','Raspberry%20Pi%20Zero%202%20W','Raspberry%20Pi%203%20B%2B'],datasets:[{label:'CPU%20Single',data:[1041.75,861.41,583.00,398.15,370.98,369.88,350.75,196.27,21.78],backgroundColor:'rgba(54,162,235,0.8)',borderWidth:0},{label:'CPU%20Multi',data:[4165.05,3427.36,2330.16,1558.41,1466.78,1432.45,1356.49,783.68,83.41],backgroundColor:'rgba(255,99,132,0.8)',borderWidth:0}]},options:{responsive:false,maintainAspectRatio:false,plugins:{title:{display:false},legend:{display:true,position:'bottom',labels:{boxWidth:12,padding:8,font:{size:10}}}},scales:{x:{beginAtZero:true,grid:{display:false},ticks:{display:false}},y:{grid:{display:false},ticks:{font:{size:10}}}}}}>)
 
-_Beta: built from Armbian's development branch until the board is part of a stable Armbian release._
+Benchmark methodology: Results obtained using sysbench with the following commands:
+
+```bash
+# CPU Single
+sysbench cpu --cpu-max-prime=20000 --threads=1 --time=200 run
+# CPU Multi
+sysbench cpu --cpu-max-prime=20000 --threads=4 --time=200 run
+```
+
+## Hardware Recommendations
+
+### SD Card / Storage
+
+16GB storage should be enough when only using evcc.
+We recommend eMMC over SD card for your system, as it is faster and more durable.
+
+If you use an SD card, pick a quality one from a known brand, rated **A1/A2** and **U3/V30**.
+High-endurance cards (for dashcams/CCTV) last longer.
+
+See [Armbian's SD card guide](https://docs.armbian.com/getting-started/sd-cards/) for details.
+
+### CPU and RAM
+
+All above boards have plenty of CPU and RAM for evcc.
+1GB RAM should be enough.
+Pick 2GB if you want to be on the safe side.
+
+### Power Supply
+
+Use the power supply recommended by the board manufacturer.
+Weak or cheap power supplies are a common cause of crashes and SD card corruption.
 
 ## Available Services
 
@@ -145,21 +169,6 @@ For boards with internal eMMC storage (like NanoPi R3S), you can migrate your sy
 
 For more details, see the [Armbian Getting Started Guide](https://docs.armbian.com/User-Guide_Getting-Started/#installation).
 
-## Hardware Recommendations
-
-### Storage
-
-16GB storage should be enough when only using evcc.
-We recommend eMMC over SD card for your system, as it is faster and more durable.
-**Most NanoPi boards are available with built-in eMMC storage.**
-If you decide to run your system directly from SD card, be sure to read [Armbian's recommendations](https://docs.armbian.com/User-Guide_Getting-Started/#armbian-getting-started-guide) first.
-
-### CPU and RAM
-
-All above boards have plenty of CPU and RAM for evcc.
-1GB RAM should be enough.
-Pick 2GB if you want to be on the safe side.
-
 ## Network Recommendations
 
 For reliability we **strongly suggest** using a **wired ethernet connection**.
@@ -185,21 +194,6 @@ For ethernet-only boards like the NanoPi, you can use WiFi USB dongles. The foll
 - EDUP EP-N8508GS
 - TP-Link Archer T3U Nano (AC1300, dual-band)
 - _add your's here ..._
-
-## Hardware Comparison
-
-CPU performance is not critical for evcc operation as it's not CPU-intensive. These benchmarks are provided for reference and future-proofing considerations.
-
-![CPU Performance Chart](<https://quickchart.io/chart?w=800&h=320&c={type:'horizontalBar',data:{labels:['Raspberry%20Pi%203%20B%2B','Raspberry%20Pi%20Zero%202%20W','NanoPi%20Zero2','NanoPi%20R28S','NanoPi%20R3S','NanoPi%20NEO3%20Plus','Raspberry%20Pi%204','NanoPi%20R76S','Raspberry%20Pi%205'],datasets:[{label:'CPU%20Single',data:[21.78,196.27,350.75,369.88,370.98,398.15,583.00,861.41,1041.75],backgroundColor:'rgba(54,162,235,0.8)',borderWidth:0},{label:'CPU%20Multi',data:[83.41,783.68,1356.49,1432.45,1466.78,1558.41,2330.16,3427.36,4165.05],backgroundColor:'rgba(255,99,132,0.8)',borderWidth:0}]},options:{responsive:false,maintainAspectRatio:false,plugins:{title:{display:false},legend:{display:true,position:'bottom',labels:{boxWidth:12,padding:8,font:{size:10}}}},scales:{x:{beginAtZero:true,grid:{display:false},ticks:{display:false}},y:{grid:{display:false},ticks:{font:{size:10}}}}}}>)
-
-Benchmark methodology: Results obtained using sysbench with the following commands:
-
-```bash
-# CPU Single
-sysbench cpu --cpu-max-prime=20000 --threads=1 --time=200 run
-# CPU Multi
-sysbench cpu --cpu-max-prime=20000 --threads=4 --time=200 run
-```
 
 ## Building Images Locally
 
