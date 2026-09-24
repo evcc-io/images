@@ -35,12 +35,10 @@ jobs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
       release_name: ${{ steps.release-name.outputs.name }}
       release_tag: ${{ steps.release-name.outputs.tag }}
-      release_id: ${{ steps.create-release.outputs.id }}
-      release_upload_url: ${{ steps.create-release.outputs.upload_url }}
       is_draft: ${{ steps.set-draft.outputs.is_draft }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Compute matrix
         id: set-matrix
@@ -103,16 +101,13 @@ jobs:
           echo "Latest evcc stable version on Armbian trixie." > release_notes.md
 
       - name: Create Release
-        id: create-release
-        uses: actions/create-release@v1
+        run: |
+          gh release create "$TAG" --draft --target "$GITHUB_SHA" \
+            --title "evcc Images $NAME" --notes-file release_notes.md
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: ${{ steps.release-name.outputs.tag }}
-          release_name: evcc Images ${{ steps.release-name.outputs.name }}
-          body_path: release_notes.md
-          draft: true
-          prerelease: false
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ steps.release-name.outputs.tag }}
+          NAME: ${{ steps.release-name.outputs.name }}
 
   build:
     needs: prepare
@@ -125,7 +120,7 @@ jobs:
     name: Build ${{ matrix.board }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Prepare Docker and workspace
         run: |
@@ -180,35 +175,16 @@ jobs:
             *) echo "board=${{ matrix.board }}" >> $GITHUB_OUTPUT ;;
           esac
 
-      - name: Upload compressed image to release
-        uses: actions/upload-release-asset@v1
+      - name: Upload files to release
+        run: |
+          base="evcc_${{ steps.asset-name.outputs.board }}.img"
+          mv "${{ steps.find-files.outputs.img_zip }}" "$base.zip"
+          mv "${{ steps.find-files.outputs.sha_file }}" "$base.sha"
+          mv "${{ steps.find-files.outputs.txt_file }}" "$base.txt"
+          gh release upload "$TAG" "$base.zip" "$base.sha" "$base.txt"
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ needs.prepare.outputs.release_upload_url }}
-          asset_path: ${{ steps.find-files.outputs.img_zip }}
-          asset_name: evcc_${{ steps.asset-name.outputs.board }}.img.zip
-          asset_content_type: application/zip
-
-      - name: Upload SHA file to release
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ needs.prepare.outputs.release_upload_url }}
-          asset_path: ${{ steps.find-files.outputs.sha_file }}
-          asset_name: evcc_${{ steps.asset-name.outputs.board }}.img.sha
-          asset_content_type: text/plain
-
-      - name: Upload TXT file to release
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ needs.prepare.outputs.release_upload_url }}
-          asset_path: ${{ steps.find-files.outputs.txt_file }}
-          asset_name: evcc_${{ steps.asset-name.outputs.board }}.img.txt
-          asset_content_type: text/plain
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ needs.prepare.outputs.release_tag }}
 
   finalize:
     needs: [prepare, build]
