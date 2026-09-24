@@ -40,7 +40,7 @@ The links below always point to the latest release. Older versions and build log
 
 - **Raspberry Pi 4, 5, 3B+, Zero 2W**
   - Image: [evcc_raspberry-pi.img.zip](https://github.com/evcc-io/images/releases/latest/download/evcc_raspberry-pi.img.zip) ([checksum](https://github.com/evcc-io/images/releases/latest/download/evcc_raspberry-pi.img.sha))
-  - WiFi setup: supported
+  - WiFi setup: supported (built-in WiFi)
   - Storage: SD Card
 
 - **NanoPi Zero2**
@@ -57,6 +57,18 @@ The links below always point to the latest release. Older versions and build log
   - Image: [evcc_nanopi-r76s.img.zip](https://github.com/evcc-io/images/releases/latest/download/evcc_nanopi-r76s.img.zip) ([checksum](https://github.com/evcc-io/images/releases/latest/download/evcc_nanopi-r76s.img.sha))
   - WiFi setup: via USB adapter ([see below](#network-recommendations))
   - Storage: SD or eMMC ([see instructions](https://docs.armbian.com/User-Guide_Getting-Started/#installation))
+
+- **NanoPi NEO3 Plus** (beta)
+  - Image: [evcc_nanopi-neo3-plus.img.zip](https://github.com/evcc-io/images/releases/latest/download/evcc_nanopi-neo3-plus.img.zip) ([checksum](https://github.com/evcc-io/images/releases/latest/download/evcc_nanopi-neo3-plus.img.sha))
+  - WiFi setup: via USB adapter ([see below](#network-recommendations))
+  - Storage: SD or eMMC ([see instructions](https://docs.armbian.com/User-Guide_Getting-Started/#installation))
+
+- **NanoPi R28S** (beta)
+  - Image: [evcc_nanopi-r28s.img.zip](https://github.com/evcc-io/images/releases/latest/download/evcc_nanopi-r28s.img.zip) ([checksum](https://github.com/evcc-io/images/releases/latest/download/evcc_nanopi-r28s.img.sha))
+  - WiFi setup: supported (built-in WiFi)
+  - Storage: SD or eMMC ([see instructions](https://docs.armbian.com/User-Guide_Getting-Started/#installation))
+
+_Beta: built from Armbian's development branch until the board is part of a stable Armbian release._
 
 ## Available Services
 
@@ -138,8 +150,8 @@ For more details, see the [Armbian Getting Started Guide](https://docs.armbian.c
 ### Storage
 
 16GB storage should be enough when only using evcc.
-We recommend running your system from eMMC instead of SD card.
-**NanoPi boards come with built-in eMMC storage.**
+We recommend eMMC over SD card for your system, as it is faster and more durable.
+**Most NanoPi boards are available with built-in eMMC storage.**
 If you decide to run your system directly from SD card, be sure to read [Armbian's recommendations](https://docs.armbian.com/User-Guide_Getting-Started/#armbian-getting-started-guide) first.
 
 ### CPU and RAM
@@ -178,7 +190,7 @@ For ethernet-only boards like the NanoPi, you can use WiFi USB dongles. The foll
 
 CPU performance is not critical for evcc operation as it's not CPU-intensive. These benchmarks are provided for reference and future-proofing considerations.
 
-![CPU Performance Chart](<https://quickchart.io/chart?w=800&h=260&c={type:'horizontalBar',data:{labels:['Raspberry%20Pi%203%20B%2B','Raspberry%20Pi%20Zero%202%20W','NanoPi%20Zero2','NanoPi%20R3S','Raspberry%20Pi%204','NanoPi%20R76S','Raspberry%20Pi%205'],datasets:[{label:'CPU%20Single',data:[21.78,196.27,350.75,370.98,583.00,861.41,1041.75],backgroundColor:'rgba(54,162,235,0.8)',borderWidth:0},{label:'CPU%20Multi',data:[83.41,783.68,1356.49,1466.78,2330.16,3427.36,4165.05],backgroundColor:'rgba(255,99,132,0.8)',borderWidth:0}]},options:{responsive:false,maintainAspectRatio:false,plugins:{title:{display:false},legend:{display:true,position:'bottom',labels:{boxWidth:12,padding:8,font:{size:10}}}},scales:{x:{beginAtZero:true,grid:{display:false},ticks:{display:false}},y:{grid:{display:false},ticks:{font:{size:10}}}}}}>)
+![CPU Performance Chart](<https://quickchart.io/chart?w=800&h=320&c={type:'horizontalBar',data:{labels:['Raspberry%20Pi%203%20B%2B','Raspberry%20Pi%20Zero%202%20W','NanoPi%20Zero2','NanoPi%20R28S','NanoPi%20R3S','NanoPi%20NEO3%20Plus','Raspberry%20Pi%204','NanoPi%20R76S','Raspberry%20Pi%205'],datasets:[{label:'CPU%20Single',data:[21.78,196.27,350.75,369.88,370.98,398.15,583.00,861.41,1041.75],backgroundColor:'rgba(54,162,235,0.8)',borderWidth:0},{label:'CPU%20Multi',data:[83.41,783.68,1356.49,1432.45,1466.78,1558.41,2330.16,3427.36,4165.05],backgroundColor:'rgba(255,99,132,0.8)',borderWidth:0}]},options:{responsive:false,maintainAspectRatio:false,plugins:{title:{display:false},legend:{display:true,position:'bottom',labels:{boxWidth:12,padding:8,font:{size:10}}}},scales:{x:{beginAtZero:true,grid:{display:false},ticks:{display:false}},y:{grid:{display:false},ticks:{font:{size:10}}}}}}>)
 
 Benchmark methodology: Results obtained using sysbench with the following commands:
 

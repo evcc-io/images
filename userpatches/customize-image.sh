@@ -110,6 +110,8 @@ echo "[customize-image] setting up comitup for wifi configuration"
 
 # Install comitup from Debian trixie main (1.43+ includes the device-type/primary_wifi_device fix)
 apt-get install -y --no-install-recommends comitup
+# Started on demand by evcc-wifi-setup; enabled by default it crash-loops on boards without WiFi
+systemctl disable comitup.service || true
 
 # Clean up any potential interface conflicts
 rm -f /etc/network/interfaces || true
