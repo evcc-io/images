@@ -2,7 +2,7 @@
   "os_list": [
     {
       "name": "evcc",
-      "description": "open source solar EV charging and smart heating",
+      "description": "smart charging | open source energy management",
       "version": "2026-10.2",
       "release_date": "2026-10-12",
       "url": "https://github.com/evcc-io/images/releases/download/v2026-10.2/evcc_raspberry-pi.img.zip",
