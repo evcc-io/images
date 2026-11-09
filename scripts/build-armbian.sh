@@ -53,7 +53,7 @@ esac
 
 # Armbian build framework version. Newer boards and the rockchip64 6.18 iommu patch fix are only on trunk until the next stable tag (v26.11).
 case "$BOARD" in
-  nanopi-neo3-plus|nanopi-r28s|nanopi-r3s) ARMBIAN_REF="v26.11.0-trunk.102" ;;
+  nanopi-neo3-plus|nanopi-r28s|nanopi-r3s) ARMBIAN_REF="v26.11.0-trunk.125" ;;
   *) ARMBIAN_REF="v26.5.1" ;;
 esac
 
