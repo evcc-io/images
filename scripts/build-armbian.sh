@@ -52,8 +52,10 @@ case "$BOARD" in
 esac
 
 # Armbian build framework version. Newer boards and the rockchip64 6.18 iommu patch fix are only on trunk until the next stable tag (v26.11).
+# rpi: release branch pins rpi-6.18.y via git_sources.json; newer 6.18.62+ oopses in misc/rp1 and Pi 5 can't find root (#45).
 case "$BOARD" in
   nanopi-neo3-plus|nanopi-r28s|nanopi-r3s) ARMBIAN_REF="v26.11.0-trunk.133" ;;
+  rpi) ARMBIAN_REF="v26.08" ;;
   *) ARMBIAN_REF="v26.5.1" ;;
 esac
 
