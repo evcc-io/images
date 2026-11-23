@@ -51,10 +51,10 @@ case "$BOARD" in
   *) KERNEL_BRANCH="current" ;;
 esac
 
-# Armbian build framework version. Newer boards and the rockchip64 6.18 iommu patch fix are only on trunk until the next stable tag (v26.11).
-# Release branches pin kernel sources via git_sources.json; rpi-6.18.62+ breaks Pi 5 boot (#45).
+# Armbian release branches pin kernel sources via git_sources.json; trunk tags float and break when patches fall behind.
+# rockchip boards need v26.11 (newer boards, patches matching 6.18.64). rpi stays on v26.08: rpi-6.18.62+ breaks Pi 5 boot (#45, armbian/build#11510).
 case "$BOARD" in
-  nanopi-neo3-plus|nanopi-r28s|nanopi-r3s) ARMBIAN_REF="v26.11.0-trunk.133" ;;
+  nanopi-neo3-plus|nanopi-r28s|nanopi-r3s) ARMBIAN_REF="v26.11" ;;
   *) ARMBIAN_REF="v26.08" ;;
 esac
 

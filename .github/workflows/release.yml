@@ -205,7 +205,8 @@ jobs:
     steps:
       - name: Delete failed release
         run: |
-          gh release delete "$TAG" --repo "$GITHUB_REPOSITORY" --yes --cleanup-tag
+          # draft releases have no git tag yet, so no --cleanup-tag
+          gh release delete "$TAG" --repo "$GITHUB_REPOSITORY" --yes
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           TAG: ${{ needs.prepare.outputs.release_tag }}
