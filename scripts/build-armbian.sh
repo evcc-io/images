@@ -116,6 +116,7 @@ pushd "$BUILD_DIR" >/dev/null
     BUILD_MINIMAL=no \
     BUILD_DESKTOP=no \
     KERNEL_CONFIGURE=no \
+    CONSOLE_AUTOLOGIN=no \
     COMPRESS_OUTPUTIMAGE=sha
 popd >/dev/null
 
